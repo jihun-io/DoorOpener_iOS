@@ -7,6 +7,12 @@
 
 import SwiftUI
 
+class Global: ObservableObject {
+    func userInfoLoad() {
+        print("테스트!!")
+    }
+}
+
 struct Login: View {
     @Binding var loginSuccessful: Bool
     @State private var email = ""
@@ -112,10 +118,13 @@ struct Login: View {
 }
 
 struct ParentView: View {
+    @EnvironmentObject var global: Global
+    
     @State private var loginSuccessful = UserDefaults.standard.bool(forKey: "loginSuccessful")
     
     @State private var userName = UserDefaults.standard.string(forKey: "user_name") ?? "Unknown"
     @State private var userEmail = UserDefaults.standard.string(forKey: "user_email") ?? "Unknown"
+    
     
     var body: some View {
         if loginSuccessful {
@@ -123,6 +132,10 @@ struct ParentView: View {
         } else {
             Login(loginSuccessful: $loginSuccessful)
         }
+    }
+    
+    init() {
+        global.userInfoLoad()
     }
 }
 
@@ -153,7 +166,7 @@ struct ContentView: View {
 
 struct Main: View {
     @State private var loginSuccessful = UserDefaults.standard.bool(forKey: "loginSuccessful")
-
+    
     @Binding var userName: String
     @Binding var userEmail: String
     
@@ -263,11 +276,11 @@ struct EditUser: View {
     @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
     
     init(userName: Binding<String>, userEmail: Binding<String>) {
-           _userName = userName
-           _userEmail = userEmail
-           _userNameT = State(initialValue: userName.wrappedValue)
-           _userEmailT = State(initialValue: userEmail.wrappedValue)
-       }
+        _userName = userName
+        _userEmail = userEmail
+        _userNameT = State(initialValue: userName.wrappedValue)
+        _userEmailT = State(initialValue: userEmail.wrappedValue)
+    }
     
     var body: some View {
         VStack {
@@ -289,7 +302,7 @@ struct EditUser: View {
                     }
                 }
                 Section {
-                    NavigationLink(destination: ModifyPassword(userName: $userName, userEmail: $userEmail)) {
+                    NavigationLink(destination: ModifyPassword()) {
                         Text("비밀번호 변경")
                     }
                 }
@@ -376,7 +389,7 @@ struct EditUser: View {
             }
         }.resume()
     }
-
+    
 }
 
 extension Dictionary {
@@ -391,40 +404,6 @@ extension Dictionary {
         .data(using: .utf8)
     }
 }
-
-
-
-
-
-
-
-//struct EditUser: View {
-//    @State private var userName = UserDefaults.standard.string(forKey: "user_name") ?? "Unknown"
-//    @State private var userEmail = UserDefaults.standard.string(forKey: "user_email") ?? "Unknown"
-//
-//    var body: some View {
-//        VStack {
-//            GroupBox(content: {
-//                Text(userName)
-//                    .font(.title)
-//                Text(userEmail)
-//                    .font(.headline)
-//                    .fontWeight(.regular)
-//            })
-//            List {
-//                NavigationLink(destination: Modify()) {
-//                    Text("개인정보 변경")
-//                }
-//                NavigationLink(destination: Password()) {
-//                    Text("비밀번호 변경")
-//                }
-//            }
-//
-//        }
-//        .background(Color(UIColor.systemGray6))
-//        .navigationBarTitle("사용자 정보", displayMode: .inline)
-//    }
-//}
 
 struct ModifyName: View {
     @Binding var text: String
@@ -492,18 +471,49 @@ struct ModifyEmail: View {
     }
 }
 
+
+
 struct ModifyPassword: View {
-    @Binding var userName: String
-    @Binding var userEmail: String
+    @State var password: String = ""
+    @State var password2: String = ""
+    @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
+    
+    
+    enum AlertType: Identifiable {
+        case emptyPassword, passwordMismatch
+        
+        var id: Int {
+            switch self {
+            case .emptyPassword:
+                return 1
+            case .passwordMismatch:
+                return 2
+            }
+        }
+    }
+    
+    @State private var alertType: AlertType?
     
     var body: some View {
         VStack {
             List {
-                NavigationLink(destination: EditUser(userName: $userName, userEmail: $userEmail)) {
-                    Text("개인정보 변경")
+                VStack {
+                    HStack {
+                        Text("신규")
+                        Spacer()
+                            .padding(.trailing)
+                        SecureField("비밀번호", text: $password)
+                            .frame(width: 200.0)
+                    }
                 }
-                NavigationLink(destination: EditUser(userName: $userName, userEmail: $userEmail)) {
-                    Text("비밀번호 변경")
+                VStack {
+                    HStack {
+                        Text("재확인")
+                        Spacer()
+                            .padding(.trailing)
+                        SecureField("비밀번호 재확인", text: $password2)
+                            .frame(width: 200.0)
+                    }
                 }
                 
             }
@@ -511,6 +521,48 @@ struct ModifyPassword: View {
         }
         .background(Color(UIColor.systemGray6))
         .navigationBarTitle("비밀번호 변경", displayMode: .inline)
+        .navigationBarItems(trailing: Button("완료") {
+            sendPostRequest()
+        })
+        .alert(item: $alertType) { alertType in
+            switch alertType {
+            case .emptyPassword:
+                return Alert(title: Text("비밀번호 변경 실패"), message: Text("비밀번호를 입력하십시오."), dismissButton: .default(Text("확인")))
+            case .passwordMismatch:
+                return Alert(title: Text("비밀번호 변경 실패"), message: Text("비밀번호가 동일하지 않습니다."), dismissButton: .default(Text("확인")))
+            }
+        }
+    }
+    func sendPostRequest() {
+        if password.isEmpty {
+            self.alertType = .emptyPassword
+        } else {
+            if password == password2 {
+                guard let url = URL(string: "https://dooropener.jihun.io/settings/user/password/request") else {
+                    print("Invalid URL")
+                    return
+                }
+                
+                var request = URLRequest(url: url)
+                request.httpMethod = "POST"
+                request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
+                
+                let parameters: [String: Any] = ["password": password]
+                request.httpBody = parameters.percentEncoded()
+                
+                URLSession.shared.dataTask(with: request) { data, response, error in
+                    if let error = error {
+                        print("Error: \(error)")
+                    } else {
+                        DispatchQueue.main.async {
+                            self.presentationMode.wrappedValue.dismiss()
+                        }
+                    }
+                }.resume()
+            } else {
+                self.alertType = .passwordMismatch
+            }
+        }
     }
 }
 

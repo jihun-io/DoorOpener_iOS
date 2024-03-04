@@ -17,8 +17,8 @@ struct DoorOpenerApp: App {
     
     var body: some Scene {
         WindowGroup {
-//            ParentView().environmentObject(settings)
             ParentView()
+                .environmentObject(Global())
 
         }
     }
