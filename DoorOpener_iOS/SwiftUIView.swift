@@ -11,13 +11,31 @@ class ViewModel: ObservableObject {
     @Published var showOpenView = false
 }
 
+class Setup: ObservableObject {
+//    @Published var isTest: Bool = false
+} //혹시 모르니 남겨두자...
+
+class Destination: ObservableObject {
+    @Published var destinationLink: String = ""
+}
+
 class Global: ObservableObject {
     @Published var doorStatus: String = ""
     
+    @AppStorage("isTest") var isTest: Bool = false
+    
     func openDoor() {
+        var openerLink: String
+        if isTest {
+            openerLink = "https://dooropener.jihun.io/openwithapptest"
+        } else {
+            openerLink = "https://dooropener.jihun.io/openwithapp"
+        }
+        
+        
         self.doorStatus = "문을 여는 중입니다..."
         DispatchQueue.main.async {
-            guard let url = URL(string: "https://dooropener.jihun.io/openwithapptest") else {
+            guard let url = URL(string: openerLink) else {
                 print("Invalid URL")
                 return
             }
@@ -325,6 +343,9 @@ struct Main: View {
 struct Settings: View {
     @State private var showingLogoutAlert = false
     @EnvironmentObject var userData: UserData
+    @EnvironmentObject var setup: Setup
+    
+    @AppStorage("isTest") var isTest: Bool = false
     
     @Binding var loginSuccessful: Bool
     
@@ -365,6 +386,9 @@ struct Settings: View {
                     //                            Text("시스템 정보")
                     //                        }
                     //                    }
+                    Section {
+                        Toggle("테스트 모드", isOn: $isTest)
+                    }
                     Section {
                         Button(action: {
                             self.showingLogoutAlert = true
@@ -733,6 +757,8 @@ struct DoorOpenedView: View {
     @Environment(\.presentationMode) var presentationMode
     @EnvironmentObject var userData: UserData
     
+    @AppStorage("isTest") var isTest: Bool = false
+    
     
     var body: some View {
         let nameGet = userData.username
@@ -755,6 +781,12 @@ struct DoorOpenedView: View {
                         
                         Text("문을 성공적으로 열었습니다.")
                             .padding(.all)
+                        if isTest {
+                            Text("테스트 모드입니다.\n실제로 문이 열리지 않았습니다.")
+                                .font(.caption)
+                                .foregroundColor(Color.gray)
+                                .multilineTextAlignment(.center)
+                        }
                     }
                     .padding(.all, 15)
                     .background(Color(UIColor.secondarySystemBackground))
@@ -809,6 +841,7 @@ struct SwiftUIView_Previews: PreviewProvider {
             .environmentObject(UserData())
             .environmentObject(ViewModel())
             .environmentObject(Global())
+            .environmentObject(Setup())
             .onOpenURL { url in
                 if url.absoluteString == "dooropener://open" {
                     print(url)
