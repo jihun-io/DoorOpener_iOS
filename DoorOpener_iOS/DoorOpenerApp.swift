@@ -13,12 +13,16 @@ import SwiftUI
 
 @main
 struct DoorOpenerApp: App {
+//    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 //    @StateObject var settings = UserSettings()
+    
+    
+    @StateObject var userData = UserData()
     
     var body: some Scene {
         WindowGroup {
             ParentView()
-                .environmentObject(Global())
+                .environmentObject(userData)
 
         }
     }

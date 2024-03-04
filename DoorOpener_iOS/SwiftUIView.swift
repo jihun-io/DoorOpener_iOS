@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Combine
 
 class Global: ObservableObject {
     @Published var doorStatus: String = ""
@@ -63,9 +64,15 @@ class Global: ObservableObject {
     }
 }
 
+class UserData: ObservableObject {
+    @Published var username: String = UserDefaults.standard.string(forKey: "user_name") ?? ""
+    @Published var email: String = UserDefaults.standard.string(forKey: "user_email") ?? ""
+}
+
 
 struct Login: View {
     @Binding var loginSuccessful: Bool
+    @EnvironmentObject var userData: UserData
     @State private var email = ""
     @State private var password = ""
     @State private var showingAlert = false  // 알림 표시 여부를 결정하는 새로운 @State 변수
@@ -132,9 +139,12 @@ struct Login: View {
                                                     // 사용자 이름과 이메일을 저장합니다.
                                                     UserDefaults.standard.set(name, forKey: "user_name")
                                                     UserDefaults.standard.set(email, forKey: "user_email")
-                                                    print("userID 저장 완료!!!!!!!!!!!!!!!!!!!")
-                                                    self.loginSuccessful = true
+                                                    userData.username = name
+                                                    userData.email = email
+                                                    print("userID 저장 완료")
+                                                    print("\(userData.username), \(userData.email)")
                                                     UserDefaults.standard.set(true, forKey: "loginSuccessful")
+                                                    self.loginSuccessful = true
                                                     print("로그인성공!!!!!!!!!!")
                                                 }
                                             }
@@ -170,17 +180,28 @@ struct Login: View {
 
 struct ParentView: View {
     @EnvironmentObject var global: Global
+    @EnvironmentObject var userData: UserData
+    
+    @Environment(\.openURL) var openURL
+    
     
     @State private var loginSuccessful = UserDefaults.standard.bool(forKey: "loginSuccessful")
     
-    @State private var userName = UserDefaults.standard.string(forKey: "user_name") ?? "Unknown"
-    @State private var userEmail = UserDefaults.standard.string(forKey: "user_email") ?? "Unknown"
+    //    @State private var userName = UserDefaults.standard.string(forKey: "user_name") ?? "Unknown"
+    //    @State private var userEmail = UserDefaults.standard.string(forKey: "user_email") ?? "Unknown"
+    
+    @State private var shouldShowOpenView = false
     
     
     var body: some View {
         Group {
             if loginSuccessful {
-                ContentView(loginSuccessful: $loginSuccessful, userName: $userName, userEmail: $userEmail)
+                //                if shouldShowOpenView {
+                //                    Open()
+                //                } else {
+                ContentView(loginSuccessful: $loginSuccessful).environmentObject(userData)
+                
+                //                }
             } else {
                 Login(loginSuccessful: $loginSuccessful)
             }
@@ -189,16 +210,29 @@ struct ParentView: View {
         //            global.userInfoLoad()
         //        })
     }
+    func handleURL(_ url: URL) {
+        print("hello, world!")
+        guard let components = NSURLComponents(url: url, resolvingAgainstBaseURL: true),
+              let host = components.host else {
+            return
+        }
+        
+        if host == "open" {
+            print("OPEN PLZ")
+            
+            shouldShowOpenView = true
+        }
+    }
 }
 
 
 struct ContentView: View {
     @EnvironmentObject var global: Global
+    @EnvironmentObject var userData: UserData
+    
     
     @Binding var loginSuccessful: Bool
     
-    @Binding var userName: String
-    @Binding var userEmail: String
     
     @State private var myUserName = ""
     @State private var myUserEmail = ""
@@ -206,13 +240,13 @@ struct ContentView: View {
     var body: some View {
         Group {
             TabView {
-                Main(userName: $userName, userEmail: $userEmail)
+                Main().environmentObject(userData)
                     .tabItem {
                         Image(systemName: "house.fill")
                         Text("홈")
                     }
                 
-                Settings(loginSuccessful: $loginSuccessful, userName: $userName, userEmail: $userEmail)
+                Settings(loginSuccessful: $loginSuccessful).environmentObject(userData)
                     .tabItem {
                         Image(systemName: "gearshape.fill")
                         Text("설정")
@@ -220,32 +254,29 @@ struct ContentView: View {
             }
         }
         .onAppear(perform: {
-//            global.userInfoLoad()
+            //            global.userInfoLoad()
         })
         
     }
 }
 
 struct Main: View {
-    
     @EnvironmentObject var global: Global
+    @EnvironmentObject var userData: UserData
     
     @State private var showingOpen = false
     
     @State private var loginSuccessful = UserDefaults.standard.bool(forKey: "loginSuccessful")
-    
-    @Binding var userName: String
-    @Binding var userEmail: String
-    
-    @State private var myUserName = ""
-    @State private var myUserEmail = ""
     
     var body: some View {
         Group {
             NavigationView {
                 ZStack {
                     VStack {
-                        Text("\(userName) 님,\n안녕하세요?")
+                        Text("\(userData.username) 님,\n안녕하세요?")
+                            .onReceive(userData.$username) { _ in
+                                
+                            }
                             .font(.title)
                             .fontWeight(.bold)
                             .multilineTextAlignment(.center)
@@ -267,32 +298,32 @@ struct Main: View {
                             .cornerRadius(10)
                             .navigationBarTitle("DoorOpener")
                         }
-//                        NavigationLink(destination: Open(userName: $userName)) {
-//                            HStack {
-//                                Image(systemName: "key.horizontal.fill")
-//                                Text("문 열기")
-//                            }
-//                            
-//                            .foregroundColor(.black)
-//                            .padding()
-//                            .background(Color.yellow)
-//                            .cornerRadius(10)
-//                            .navigationBarTitle("DoorOpener")
-//                        }
+                        //                        NavigationLink(destination: Open(userName: userData.username)) {
+                        //                            HStack {
+                        //                                Image(systemName: "key.horizontal.fill")
+                        //                                Text("문 열기")
+                        //                            }
+                        //                            
+                        //                            .foregroundColor(.black)
+                        //                            .padding()
+                        //                            .background(Color.yellow)
+                        //                            .cornerRadius(10)
+                        //                            .navigationBarTitle("DoorOpener")
+                        //                        }
                         .padding(.all)
                     }
                     .padding(.all, 15)
                     .background(Color(UIColor.secondarySystemBackground))
                     .cornerRadius(10)
                     .sheet(isPresented: $showingOpen) {
-                                    Open(userName: $userName)
-                                }
+                        Open().environmentObject(userData)
+                    }
                 }
                 .background(Color(UIColor.systemBackground))
-
+                
             }
             .onAppear(perform: {
-//                global.userInfoLoad()
+                //                global.userInfoLoad()
             })
         }
         
@@ -302,18 +333,18 @@ struct Main: View {
 
 struct Settings: View {
     @State private var showingLogoutAlert = false
+    @EnvironmentObject var userData: UserData
+    
     @Binding var loginSuccessful: Bool
-    @Binding var userName: String
-    @Binding var userEmail: String
-
+    
     var body: some View {
         NavigationView {
             VStack {
                 List {
                     Section {
-                        NavigationLink(destination: EditUser(userName: $userName, userEmail: $userEmail)) {
+                        NavigationLink(destination: EditUser(userName: $userData.username, userEmail: $userData.email).environmentObject(userData)) {
                             VStack(alignment: .leading) {
-                                Text(userName)
+                                Text(userData.username)
                                     .font(.headline)
                                     .fontWeight(.bold)
                                     .multilineTextAlignment(.leading)
@@ -322,27 +353,27 @@ struct Settings: View {
                             }
                         }
                     }
-//                    Section {
-//                        NavigationLink(destination: Text("Hello, world!")) {
-//                            Text("사용자 초대")
-//                        }
-//                        NavigationLink(destination: Text("Hello, world!")) {
-//                            Text("임시 키 발급")
-//                        }
-//                        NavigationLink(destination: Text("Hello, world!")) {
-//                            Text("잠금 해제 기록")
-//                        }
-//                    }
-//                    Section {
-//                        NavigationLink(destination: Text("Hello, world!")) {
-//                            Text("단축어 앱에 추가")
-//                        }
-//                    }
-//                    Section {
-//                        NavigationLink(destination: Text("Hello, world!")) {
-//                            Text("시스템 정보")
-//                        }
-//                    }
+                    //                    Section {
+                    //                        NavigationLink(destination: Text("Hello, world!")) {
+                    //                            Text("사용자 초대")
+                    //                        }
+                    //                        NavigationLink(destination: Text("Hello, world!")) {
+                    //                            Text("임시 키 발급")
+                    //                        }
+                    //                        NavigationLink(destination: Text("Hello, world!")) {
+                    //                            Text("잠금 해제 기록")
+                    //                        }
+                    //                    }
+                    //                    Section {
+                    //                        NavigationLink(destination: Text("Hello, world!")) {
+                    //                            Text("단축어 앱에 추가")
+                    //                        }
+                    //                    }
+                    //                    Section {
+                    //                        NavigationLink(destination: Text("Hello, world!")) {
+                    //                            Text("시스템 정보")
+                    //                        }
+                    //                    }
                     Section {
                         Button(action: {
                             self.showingLogoutAlert = true
@@ -352,24 +383,26 @@ struct Settings: View {
                         }
                         .alert(isPresented: $showingLogoutAlert) {
                             Alert(title: Text("로그아웃"), message: Text("정말로 로그아웃 하시겠습니까?"), primaryButton: .destructive(Text("로그아웃")) {
-                            // 로그아웃 요청을 보냅니다.
-                            let url = URL(string: "https://dooropener.jihun.io/logout")!
-                            var request = URLRequest(url: url)
-                            request.httpMethod = "GET"
-                            let session = URLSession(configuration: .default)
-                            let task = session.dataTask(with: request) { (data, response, error) in
-                                if let error = error {
-                                    print("Error: \(error)")
-                                } else {
-                                    DispatchQueue.main.async {
-                                        self.loginSuccessful = false
-                                        UserDefaults.standard.set(false, forKey: "loginSuccessful")  // 로그인 상태를 저장합니다.
-                                        print("로그아웃 완료!!!")
+                                // 로그아웃 요청을 보냅니다.
+                                let url = URL(string: "https://dooropener.jihun.io/logout")!
+                                var request = URLRequest(url: url)
+                                request.httpMethod = "GET"
+                                let session = URLSession(configuration: .default)
+                                let task = session.dataTask(with: request) { (data, response, error) in
+                                    if let error = error {
+                                        print("Error: \(error)")
+                                    } else {
+                                        DispatchQueue.main.async {
+                                            self.loginSuccessful = false
+                                            UserDefaults.standard.set(false, forKey: "loginSuccessful")  // 로그인 상태를 저장합니다.
+                                            userData.email = ""
+                                            userData.username = ""
+                                            print("로그아웃 완료!!!")
+                                        }
                                     }
                                 }
-                            }
-                            task.resume()
-                        }, secondaryButton: .cancel())
+                                task.resume()
+                            }, secondaryButton: .cancel())
                         }
                     }
                 }
@@ -381,6 +414,9 @@ struct Settings: View {
 
 
 struct EditUser: View {
+    @EnvironmentObject var userData: UserData
+    
+    
     @Binding var userName: String
     @Binding var userEmail: String
     
@@ -396,6 +432,9 @@ struct EditUser: View {
         _userNameT = State(initialValue: userName.wrappedValue)
         _userEmailT = State(initialValue: userEmail.wrappedValue)
     }
+    //
+    //    var userNameT = userData.username
+    //    var userEmailT = userData.email
     
     var body: some View {
         VStack {
@@ -495,9 +534,9 @@ struct EditUser: View {
                 DispatchQueue.main.async {
                     UserDefaults.standard.set(name, forKey: "user_name")
                     UserDefaults.standard.set(email, forKey: "user_email")
-                    self.userName = name // @State 프로퍼티를 업데이트합니다.
-                    self.userEmail = email // @State 프로퍼티를 업데이트합니다.
-                    print("사용자 정보 업데이트 완료: \(userName), \(userEmail)")
+                    userData.username = name // @State 프로퍼티를 업데이트합니다.
+                    userData.email = email // @State 프로퍼티를 업데이트합니다.
+                    print("사용자 정보 업데이트 완료: \(userData.username), \(userData.email)")
                     
                     self.presentationMode.wrappedValue.dismiss()
                 }
@@ -701,9 +740,11 @@ struct OpeningDoorView: View {
 
 struct DoorOpenedView: View {
     @Environment(\.presentationMode) var presentationMode
-    @Binding var userName: String
+    @EnvironmentObject var userData: UserData
+    
     
     var body: some View {
+        let nameGet = userData.username
         Group {
             NavigationView {
                 ZStack {
@@ -715,7 +756,7 @@ struct DoorOpenedView: View {
                                 .padding(/*@START_MENU_TOKEN@*/.all/*@END_MENU_TOKEN@*/)
                                 .scaledToFill()
                                 .frame(width: 100, height: 100)
-                            Text("\(userName) 님,\n환영합니다!")
+                            Text("\(nameGet) 님,\n환영합니다!")
                                 .font(.title)
                                 .fontWeight(.bold)
                                 .multilineTextAlignment(.center)
@@ -749,31 +790,32 @@ struct DoorOpenedView: View {
 
 
 struct Open: View {
-    @Binding var userName: String
+    
     
     @ObservedObject var global = Global()
+    
+    @EnvironmentObject var userData: UserData
     
     var body: some View {
         VStack {
             if global.doorStatus == "문을 여는 중입니다..." {
                 OpeningDoorView()
             } else if global.doorStatus == "문을 열었습니다." {
-                DoorOpenedView(userName: $userName)
+                DoorOpenedView().environmentObject(userData)
             }
         }
         .onAppear(perform: {
             global.openDoor()
-//            UITabBar.appearance().isHidden = true // tabBar를 숨깁니다
+            //            UITabBar.appearance().isHidden = true // tabBar를 숨깁니다
         })
-//        .onDisappear(perform: {
-//            UITabBar.appearance().isHidden = false // tabBar를 숨깁니다
-//        })
+        //        .onDisappear(perform: {
+        //            UITabBar.appearance().isHidden = false // tabBar를 숨깁니다
+        //        })
     }
 }
 
-
-#Preview {
-    ParentView() //이거임
-        .environmentObject(Global())
-//    DoorOpenedViewTest()
+struct SwiftUIView_Previews: PreviewProvider {
+    static var previews: some View {
+        ParentView().environmentObject(UserData())
+    }
 }
