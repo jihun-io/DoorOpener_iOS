@@ -7,22 +7,25 @@
 
 import SwiftUI
 
-//class UserSettings: ObservableObject {
-//    @Published var loginSuccessful: Bool = UserDefaults.standard.bool(forKey: "loginSuccessful")
-//}
-
 @main
 struct DoorOpenerApp: App {
-//    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
-//    @StateObject var settings = UserSettings()
-    
+    @StateObject private var viewModel = ViewModel()
     
     @StateObject var userData = UserData()
-    
+    @StateObject var global = Global() // 이 부분을 수정했습니다.
+
     var body: some Scene {
         WindowGroup {
             ParentView()
                 .environmentObject(userData)
+                .environmentObject(viewModel)
+                .environmentObject(global)
+                .onOpenURL { url in
+                    if url.absoluteString == "dooropener://open" {
+                        print(url)
+                        viewModel.showOpenView = true
+                    }
+                }
 
         }
     }

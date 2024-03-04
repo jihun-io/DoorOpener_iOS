@@ -6,33 +6,38 @@
 //
 
 import SwiftUI
-import Combine
+
+class ViewModel: ObservableObject {
+    @Published var showOpenView = false
+}
 
 class Global: ObservableObject {
     @Published var doorStatus: String = ""
     
     func openDoor() {
         self.doorStatus = "문을 여는 중입니다..."
-        guard let url = URL(string: "https://dooropener.jihun.io/openwithapptest") else {
-            print("Invalid URL")
-            return
-        }
-        URLSession.shared.dataTask(with: url) { (data, response, error) in
-            if let error = error {
-                print("Error: \(error)")
-            } else if let data = data,
-                      let str = String(data: data, encoding: .utf8),
-                      let doorOpenRegex = try? NSRegularExpression(pattern: "<p>(문을 열었습니다.)</p>", options: []),
-                      let doorOpenMatch = doorOpenRegex.firstMatch(in: str, options: [], range: NSRange(location: 0, length: str.utf16.count)),
-                      let doorOpenRange = Range(doorOpenMatch.range(at: 1), in: str) {
-                let doorOpenMessage = String(str[doorOpenRange])
-                
-                DispatchQueue.main.async {
-                    self.doorStatus = doorOpenMessage
-                    print("문 상태 업데이트 완료: \(self.doorStatus)")
-                }
+        DispatchQueue.main.async {
+            guard let url = URL(string: "https://dooropener.jihun.io/openwithapptest") else {
+                print("Invalid URL")
+                return
             }
-        }.resume()
+            URLSession.shared.dataTask(with: url) { (data, response, error) in
+                if let error = error {
+                    print("Error: \(error)")
+                } else if let data = data,
+                          let str = String(data: data, encoding: .utf8),
+                          let doorOpenRegex = try? NSRegularExpression(pattern: "<p>(문을 열었습니다.)</p>", options: []),
+                          let doorOpenMatch = doorOpenRegex.firstMatch(in: str, options: [], range: NSRange(location: 0, length: str.utf16.count)),
+                          let doorOpenRange = Range(doorOpenMatch.range(at: 1), in: str) {
+                    let doorOpenMessage = String(str[doorOpenRange])
+                    
+                    DispatchQueue.main.async {
+                        self.doorStatus = doorOpenMessage
+                        print("문 상태 업데이트 완료: \(self.doorStatus)")
+                    }
+                }
+            }.resume()
+        }
     }
     
     func userInfoLoad() {
@@ -182,48 +187,34 @@ struct ParentView: View {
     @EnvironmentObject var global: Global
     @EnvironmentObject var userData: UserData
     
-    @Environment(\.openURL) var openURL
+    @EnvironmentObject var viewModel: ViewModel
     
+    @Environment(\.openURL) var openURL
+    @Environment(\.scenePhase) var scenePhase
     
     @State private var loginSuccessful = UserDefaults.standard.bool(forKey: "loginSuccessful")
     
-    //    @State private var userName = UserDefaults.standard.string(forKey: "user_name") ?? "Unknown"
-    //    @State private var userEmail = UserDefaults.standard.string(forKey: "user_email") ?? "Unknown"
-    
-    @State private var shouldShowOpenView = false
-    
+    @State private var sheetID = 0
     
     var body: some View {
         Group {
             if loginSuccessful {
-                //                if shouldShowOpenView {
-                //                    Open()
-                //                } else {
-                ContentView(loginSuccessful: $loginSuccessful).environmentObject(userData)
-                
-                //                }
+                ContentView(loginSuccessful: $loginSuccessful)
+                    .environmentObject(userData)
+                    .sheet(isPresented: $viewModel.showOpenView) {
+                        Open().environmentObject(userData)
+                    }
             } else {
                 Login(loginSuccessful: $loginSuccessful)
             }
         }
-        //        .onAppear(perform: {
-        //            global.userInfoLoad()
-        //        })
-    }
-    func handleURL(_ url: URL) {
-        print("hello, world!")
-        guard let components = NSURLComponents(url: url, resolvingAgainstBaseURL: true),
-              let host = components.host else {
-            return
-        }
-        
-        if host == "open" {
-            print("OPEN PLZ")
-            
-            shouldShowOpenView = true
-        }
     }
 }
+
+
+
+
+
 
 
 struct ContentView: View {
@@ -303,7 +294,7 @@ struct Main: View {
                         //                                Image(systemName: "key.horizontal.fill")
                         //                                Text("문 열기")
                         //                            }
-                        //                            
+                        //
                         //                            .foregroundColor(.black)
                         //                            .padding()
                         //                            .background(Color.yellow)
@@ -746,43 +737,38 @@ struct DoorOpenedView: View {
     var body: some View {
         let nameGet = userData.username
         Group {
-            NavigationView {
-                ZStack {
+            ZStack {
+                VStack {
+                    Spacer()
                     VStack {
-                        Spacer()
-                        VStack {
-                            Image(systemName: "door.left.hand.open")
-                                .resizable()
-                                .padding(/*@START_MENU_TOKEN@*/.all/*@END_MENU_TOKEN@*/)
-                                .scaledToFill()
-                                .frame(width: 100, height: 100)
-                            Text("\(nameGet) 님,\n환영합니다!")
-                                .font(.title)
-                                .fontWeight(.bold)
-                                .multilineTextAlignment(.center)
-                                .padding(.all)
-                                .frame(width: 200.0)
-                            
-                            Text("문을 성공적으로 열었습니다.")
-                                .padding(.all)
-                        }
-                        .padding(.all, 15)
-                        .background(Color(UIColor.secondarySystemBackground))
-                        .cornerRadius(10)
-                        Spacer()
-                        Button(action: {
-                            self.presentationMode.wrappedValue.dismiss()
-                        }, label: {
-                            Text("닫기")
-                                .padding(/*@START_MENU_TOKEN@*/.all/*@END_MENU_TOKEN@*/)
-                        })
+                        Image(systemName: "door.left.hand.open")
+                            .resizable()
+                            .padding(/*@START_MENU_TOKEN@*/.all/*@END_MENU_TOKEN@*/)
+                            .scaledToFill()
+                            .frame(width: 100, height: 100)
+                        Text("\(nameGet) 님,\n환영합니다!")
+                            .font(.title)
+                            .fontWeight(.bold)
+                            .multilineTextAlignment(.center)
+                            .padding(.all)
+                            .frame(width: 200.0)
                         
+                        Text("문을 성공적으로 열었습니다.")
+                            .padding(.all)
                     }
-                    
+                    .padding(.all, 15)
+                    .background(Color(UIColor.secondarySystemBackground))
+                    .cornerRadius(10)
+                    Spacer()
+                    Button(action: {
+                        self.presentationMode.wrappedValue.dismiss()
+                    }, label: {
+                        Text("닫기")
+                            .padding(/*@START_MENU_TOKEN@*/.all/*@END_MENU_TOKEN@*/)
+                    })
                 }
-                .background(Color(UIColor.systemBackground))
-                
             }
+            .background(Color(UIColor.systemBackground))
         }
     }
 }
@@ -790,10 +776,7 @@ struct DoorOpenedView: View {
 
 
 struct Open: View {
-    
-    
-    @ObservedObject var global = Global()
-    
+    @EnvironmentObject var global: Global
     @EnvironmentObject var userData: UserData
     
     var body: some View {
@@ -802,20 +785,35 @@ struct Open: View {
                 OpeningDoorView()
             } else if global.doorStatus == "문을 열었습니다." {
                 DoorOpenedView().environmentObject(userData)
+            } else {
+                Text(global.doorStatus)
             }
         }
         .onAppear(perform: {
-            global.openDoor()
-            //            UITabBar.appearance().isHidden = true // tabBar를 숨깁니다
+            DispatchQueue.main.async {
+                global.openDoor()
+            }
         })
-        //        .onDisappear(perform: {
-        //            UITabBar.appearance().isHidden = false // tabBar를 숨깁니다
-        //        })
+//        .onAppear(perform: {
+//            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+//                global.openDoor()
+//            }
+//        })
     }
 }
 
+
 struct SwiftUIView_Previews: PreviewProvider {
     static var previews: some View {
-        ParentView().environmentObject(UserData())
+        ParentView()
+            .environmentObject(UserData())
+            .environmentObject(ViewModel())
+            .environmentObject(Global())
+            .onOpenURL { url in
+                if url.absoluteString == "dooropener://open" {
+                    print(url)
+                    ViewModel().showOpenView = true
+                }
+            }
     }
 }
