@@ -8,10 +8,61 @@
 import SwiftUI
 
 class Global: ObservableObject {
+    @Published var doorStatus: String = ""
+    
+    func openDoor() {
+        self.doorStatus = "문을 여는 중입니다..."
+        guard let url = URL(string: "https://dooropener.jihun.io/openwithapptest") else {
+            print("Invalid URL")
+            return
+        }
+        URLSession.shared.dataTask(with: url) { (data, response, error) in
+            if let error = error {
+                print("Error: \(error)")
+            } else if let data = data,
+                      let str = String(data: data, encoding: .utf8),
+                      let doorOpenRegex = try? NSRegularExpression(pattern: "<p>(문을 열었습니다.)</p>", options: []),
+                      let doorOpenMatch = doorOpenRegex.firstMatch(in: str, options: [], range: NSRange(location: 0, length: str.utf16.count)),
+                      let doorOpenRange = Range(doorOpenMatch.range(at: 1), in: str) {
+                let doorOpenMessage = String(str[doorOpenRange])
+                
+                DispatchQueue.main.async {
+                    self.doorStatus = doorOpenMessage
+                    print("문 상태 업데이트 완료: \(self.doorStatus)")
+                }
+            }
+        }.resume()
+    }
+    
     func userInfoLoad() {
-        print("테스트!!")
+        guard let url = URL(string: "https://dooropener.jihun.io/settings/user") else {
+            print("Invalid URL")
+            return
+        }
+        URLSession.shared.dataTask(with: url) { (data, response, error) in
+            if let error = error {
+                print("Error: \(error)")
+            } else if let data = data,
+                      let str = String(data: data, encoding: .utf8),
+                      let nameRegex = try? NSRegularExpression(pattern: "<h1 id=\"name\">(.*)</h1>", options: []),
+                      let emailRegex = try? NSRegularExpression(pattern: "<h2 id=\"email\">(.*)</h2>", options: []),
+                      let nameMatch = nameRegex.firstMatch(in: str, options: [], range: NSRange(location: 0, length: str.utf16.count)),
+                      let emailMatch = emailRegex.firstMatch(in: str, options: [], range: NSRange(location: 0, length: str.utf16.count)),
+                      let nameRange = Range(nameMatch.range(at: 1), in: str),
+                      let emailRange = Range(emailMatch.range(at: 1), in: str) {
+                let name = String(str[nameRange])
+                let email = String(str[emailRange])
+                
+                DispatchQueue.main.async {
+                    UserDefaults.standard.set(name, forKey: "user_name")
+                    UserDefaults.standard.set(email, forKey: "user_email")
+                    print("사용자 정보 업데이트 완료: \(UserDefaults.standard.string(forKey: "user_name") ?? ""), \(UserDefaults.standard.string(forKey: "user_email") ?? "")")
+                }
+            }
+        }.resume()
     }
 }
+
 
 struct Login: View {
     @Binding var loginSuccessful: Bool
@@ -127,83 +178,122 @@ struct ParentView: View {
     
     
     var body: some View {
-        if loginSuccessful {
-            ContentView(loginSuccessful: $loginSuccessful, userName: $userName, userEmail: $userEmail)
-        } else {
-            Login(loginSuccessful: $loginSuccessful)
+        Group {
+            if loginSuccessful {
+                ContentView(loginSuccessful: $loginSuccessful, userName: $userName, userEmail: $userEmail)
+            } else {
+                Login(loginSuccessful: $loginSuccessful)
+            }
         }
-    }
-    
-    init() {
-        global.userInfoLoad()
+        //        .onAppear(perform: {
+        //            global.userInfoLoad()
+        //        })
     }
 }
 
 
 struct ContentView: View {
+    @EnvironmentObject var global: Global
+    
     @Binding var loginSuccessful: Bool
     
     @Binding var userName: String
     @Binding var userEmail: String
     
+    @State private var myUserName = ""
+    @State private var myUserEmail = ""
+    
     var body: some View {
-        TabView {
-            Main(userName: $userName, userEmail: $userEmail)
-                .tabItem {
-                    Image(systemName: "house.fill")
-                    Text("홈")
-                }
-            
-            Settings(loginSuccessful: $loginSuccessful, userName: $userName, userEmail: $userEmail)
-                .tabItem {
-                    Image(systemName: "gearshape.fill")
-                    Text("설정")
-                }
+        Group {
+            TabView {
+                Main(userName: $userName, userEmail: $userEmail)
+                    .tabItem {
+                        Image(systemName: "house.fill")
+                        Text("홈")
+                    }
+                
+                Settings(loginSuccessful: $loginSuccessful, userName: $userName, userEmail: $userEmail)
+                    .tabItem {
+                        Image(systemName: "gearshape.fill")
+                        Text("설정")
+                    }
+            }
         }
+        .onAppear(perform: {
+//            global.userInfoLoad()
+        })
         
     }
 }
 
 struct Main: View {
+    
+    @EnvironmentObject var global: Global
+    
+    @State private var showingOpen = false
+    
     @State private var loginSuccessful = UserDefaults.standard.bool(forKey: "loginSuccessful")
     
     @Binding var userName: String
     @Binding var userEmail: String
     
+    @State private var myUserName = ""
+    @State private var myUserEmail = ""
+    
     var body: some View {
-        
-        NavigationView {
-            ZStack {
-                Color(UIColor.systemGray6).ignoresSafeArea()
-                
-                VStack {
-                    Text("\(userName) 님,\n안녕하세요?")
-                        .font(.title)
-                        .fontWeight(.bold)
-                        .multilineTextAlignment(.center)
-                        .padding(.all)
-                        .frame(width: 200.0)
-                    Spacer()
-                        .frame(height: 50)
-                    Button(action: {}) {
-                        HStack {
-                            Image(systemName: "key.horizontal.fill")
-                            Text("문 열기")
+        Group {
+            NavigationView {
+                ZStack {
+                    VStack {
+                        Text("\(userName) 님,\n안녕하세요?")
+                            .font(.title)
+                            .fontWeight(.bold)
+                            .multilineTextAlignment(.center)
+                            .padding(.all)
+                            .frame(width: 200.0)
+                        Spacer()
+                            .frame(height: 50)
+                        Button(action: {
+                            self.showingOpen = true
+                        }) {
+                            HStack {
+                                Image(systemName: "key.horizontal.fill")
+                                Text("문 열기")
+                            }
+                            
+                            .foregroundColor(.black)
+                            .padding()
+                            .background(Color.yellow)
+                            .cornerRadius(10)
+                            .navigationBarTitle("DoorOpener")
                         }
-                        
-                        .foregroundColor(.black)
-                        .padding()
-                        .background(Color.yellow)
-                        .cornerRadius(10)
-                        .navigationBarTitle("DoorOpener")
+//                        NavigationLink(destination: Open(userName: $userName)) {
+//                            HStack {
+//                                Image(systemName: "key.horizontal.fill")
+//                                Text("문 열기")
+//                            }
+//                            
+//                            .foregroundColor(.black)
+//                            .padding()
+//                            .background(Color.yellow)
+//                            .cornerRadius(10)
+//                            .navigationBarTitle("DoorOpener")
+//                        }
+                        .padding(.all)
                     }
-                    .padding(.all)
+                    .padding(.all, 15)
+                    .background(Color(UIColor.secondarySystemBackground))
+                    .cornerRadius(10)
+                    .sheet(isPresented: $showingOpen) {
+                                    Open(userName: $userName)
+                                }
                 }
-                .padding(.all, 15)
                 .background(Color(UIColor.systemBackground))
-                .cornerRadius(10)
-                
+
             }
+            .onAppear(perform: {
+//                global.userInfoLoad()
+            })
         }
         
     }
@@ -211,59 +301,84 @@ struct Main: View {
 
 
 struct Settings: View {
-    //    @State private var loginSuccessful = UserDefaults.standard.bool(forKey: "loginSuccessful")
+    @State private var showingLogoutAlert = false
     @Binding var loginSuccessful: Bool
-    
     @Binding var userName: String
     @Binding var userEmail: String
-    
+
     var body: some View {
         NavigationView {
             VStack {
                 List {
-                    NavigationLink(destination: EditUser(userName: $userName, userEmail: $userEmail)) {
-                        VStack(alignment: .leading) {
-                            Text(userName)
-                                .font(.title)
-                                .fontWeight(.bold)
-                                .multilineTextAlignment(.leading)
-                            
-                            Text("사용자 정보 변경")
-                        }
-                    }
-                }
-                
-                Button(action: {
-                    // 로그아웃 요청을 보냅니다.
-                    let url = URL(string: "https://dooropener.jihun.io/logout")!
-                    var request = URLRequest(url: url)
-                    request.httpMethod = "GET"
-                    let session = URLSession(configuration: .default)
-                    let task = session.dataTask(with: request) { (data, response, error) in
-                        if let error = error {
-                            print("Error: \(error)")
-                        } else {
-                            DispatchQueue.main.async {
-                                self.loginSuccessful = false
-                                UserDefaults.standard.set(false, forKey: "loginSuccessful")  // 로그인 상태를 저장합니다.
-                                print("로그아웃 완료!!!")
+                    Section {
+                        NavigationLink(destination: EditUser(userName: $userName, userEmail: $userEmail)) {
+                            VStack(alignment: .leading) {
+                                Text(userName)
+                                    .font(.headline)
+                                    .fontWeight(.bold)
+                                    .multilineTextAlignment(.leading)
+                                
+                                Text("사용자 정보 변경")
                             }
                         }
                     }
-                    task.resume()
-                }) {
-                    Text("로그아웃")
-                        .foregroundColor(.white)
-                        .padding()
-                        .background(Color.red)
-                        .cornerRadius(10)
+//                    Section {
+//                        NavigationLink(destination: Text("Hello, world!")) {
+//                            Text("사용자 초대")
+//                        }
+//                        NavigationLink(destination: Text("Hello, world!")) {
+//                            Text("임시 키 발급")
+//                        }
+//                        NavigationLink(destination: Text("Hello, world!")) {
+//                            Text("잠금 해제 기록")
+//                        }
+//                    }
+//                    Section {
+//                        NavigationLink(destination: Text("Hello, world!")) {
+//                            Text("단축어 앱에 추가")
+//                        }
+//                    }
+//                    Section {
+//                        NavigationLink(destination: Text("Hello, world!")) {
+//                            Text("시스템 정보")
+//                        }
+//                    }
+                    Section {
+                        Button(action: {
+                            self.showingLogoutAlert = true
+                        }) {
+                            Text("로그아웃")
+                                .foregroundColor(.red)
+                        }
+                        .alert(isPresented: $showingLogoutAlert) {
+                            Alert(title: Text("로그아웃"), message: Text("정말로 로그아웃 하시겠습니까?"), primaryButton: .destructive(Text("로그아웃")) {
+                            // 로그아웃 요청을 보냅니다.
+                            let url = URL(string: "https://dooropener.jihun.io/logout")!
+                            var request = URLRequest(url: url)
+                            request.httpMethod = "GET"
+                            let session = URLSession(configuration: .default)
+                            let task = session.dataTask(with: request) { (data, response, error) in
+                                if let error = error {
+                                    print("Error: \(error)")
+                                } else {
+                                    DispatchQueue.main.async {
+                                        self.loginSuccessful = false
+                                        UserDefaults.standard.set(false, forKey: "loginSuccessful")  // 로그인 상태를 저장합니다.
+                                        print("로그아웃 완료!!!")
+                                    }
+                                }
+                            }
+                            task.resume()
+                        }, secondaryButton: .cancel())
+                        }
+                    }
                 }
             }
             .navigationBarTitle("설정")
         }
-        
     }
 }
+
 
 struct EditUser: View {
     @Binding var userName: String
@@ -566,7 +681,99 @@ struct ModifyPassword: View {
     }
 }
 
+struct LargeProgressViewStyle: ProgressViewStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        ProgressView(configuration)
+            .scaleEffect(2) // 크기를 2배로 조절합니다.
+    }
+}
+
+struct OpeningDoorView: View {
+    var body: some View {
+        VStack {
+            ProgressView()
+                .padding(/*@START_MENU_TOKEN@*/.all/*@END_MENU_TOKEN@*/)
+                .progressViewStyle(LargeProgressViewStyle())
+            Text("문을 여는 중입니다...")
+        }
+    }
+}
+
+struct DoorOpenedView: View {
+    @Environment(\.presentationMode) var presentationMode
+    @Binding var userName: String
+    
+    var body: some View {
+        Group {
+            NavigationView {
+                ZStack {
+                    VStack {
+                        Spacer()
+                        VStack {
+                            Image(systemName: "door.left.hand.open")
+                                .resizable()
+                                .padding(/*@START_MENU_TOKEN@*/.all/*@END_MENU_TOKEN@*/)
+                                .scaledToFill()
+                                .frame(width: 100, height: 100)
+                            Text("\(userName) 님,\n환영합니다!")
+                                .font(.title)
+                                .fontWeight(.bold)
+                                .multilineTextAlignment(.center)
+                                .padding(.all)
+                                .frame(width: 200.0)
+                            
+                            Text("문을 성공적으로 열었습니다.")
+                                .padding(.all)
+                        }
+                        .padding(.all, 15)
+                        .background(Color(UIColor.secondarySystemBackground))
+                        .cornerRadius(10)
+                        Spacer()
+                        Button(action: {
+                            self.presentationMode.wrappedValue.dismiss()
+                        }, label: {
+                            Text("닫기")
+                                .padding(/*@START_MENU_TOKEN@*/.all/*@END_MENU_TOKEN@*/)
+                        })
+                        
+                    }
+                    
+                }
+                .background(Color(UIColor.systemBackground))
+                
+            }
+        }
+    }
+}
+
+
+
+struct Open: View {
+    @Binding var userName: String
+    
+    @ObservedObject var global = Global()
+    
+    var body: some View {
+        VStack {
+            if global.doorStatus == "문을 여는 중입니다..." {
+                OpeningDoorView()
+            } else if global.doorStatus == "문을 열었습니다." {
+                DoorOpenedView(userName: $userName)
+            }
+        }
+        .onAppear(perform: {
+            global.openDoor()
+//            UITabBar.appearance().isHidden = true // tabBar를 숨깁니다
+        })
+//        .onDisappear(perform: {
+//            UITabBar.appearance().isHidden = false // tabBar를 숨깁니다
+//        })
+    }
+}
+
+
 #Preview {
     ParentView() //이거임
-    //    Settings()
+        .environmentObject(Global())
+//    DoorOpenedViewTest()
 }
