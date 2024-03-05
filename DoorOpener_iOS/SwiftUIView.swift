@@ -267,6 +267,7 @@ struct ContentView: View {
                         Text("설정")
                     }
             }
+            
         }
         .onAppear(perform: {
             //            global.userInfoLoad()
@@ -283,15 +284,16 @@ struct Main: View {
     
     @State private var loginSuccessful = UserDefaults.standard.bool(forKey: "loginSuccessful")
     
+    @State private var dragAmount = CGSize.zero
+
+    
     var body: some View {
         Group {
             NavigationView {
                 ZStack {
                     VStack {
                         Text("\(userData.username) 님,\n안녕하세요?")
-                            .onReceive(userData.$username) { _ in
-                                
-                            }
+                            .onReceive(userData.$username) { _ in }
                             .font(.title)
                             .fontWeight(.bold)
                             .multilineTextAlignment(.center)
@@ -299,32 +301,47 @@ struct Main: View {
                             .frame(width: 200.0)
                         Spacer()
                             .frame(height: 50)
-                        Button(action: {
-                            self.showingOpen = true
-                        }) {
-                            HStack {
-                                Image(systemName: "key.horizontal.fill")
-                                Text("문 열기")
+                        HStack {
+                            ZStack {
+                                HStack {
+                                    Spacer()
+                                    Text("밀어서 잠금 해제")
+                                        .fontWeight(.bold)
+                                        .multilineTextAlignment(.center)
+                                        .padding(.trailing, 20.0)
+                                        .opacity(1 - Double(dragAmount.width / 70))
+                                    
+                                }
+                                .frame(width: 200.0)
+                                HStack {
+                                    Image(systemName: "arrowshape.right.fill")
+                                        .padding(/*@START_MENU_TOKEN@*/.all/*@END_MENU_TOKEN@*/)
+                                        .fontWeight(.bold)
+                                        .background(Color(.systemYellow))
+                                        .cornerRadius(10)
+                                        .offset(x: dragAmount.width, y: 0)
+                                        .gesture(
+                                            DragGesture()
+                                                .onChanged {
+                                                    self.dragAmount = CGSize(width: min( max($0.translation.width, 0), 147), height: 0)
+                                                }
+                                                .onEnded { value in
+                                                    if value.predictedEndTranslation.width > 146 {
+                                                        self.showingOpen = true
+                                                        
+                                                    }
+                                                    withAnimation {
+                                                        self.dragAmount = .zero
+                                                    }
+                                                }
+                                        )
+                                    Spacer()
+                                }
+                                .frame(width: 200.0)
                             }
-                            
-                            .foregroundColor(.black)
-                            .padding()
-                            .background(Color.yellow)
-                            .cornerRadius(10)
-                            .navigationBarTitle("DoorOpener")
                         }
-                        //                        NavigationLink(destination: Open(userName: userData.username)) {
-                        //                            HStack {
-                        //                                Image(systemName: "key.horizontal.fill")
-                        //                                Text("문 열기")
-                        //                            }
-                        //
-                        //                            .foregroundColor(.black)
-                        //                            .padding()
-                        //                            .background(Color.yellow)
-                        //                            .cornerRadius(10)
-                        //                            .navigationBarTitle("DoorOpener")
-                        //                        }
+                        .background(Color(.systemGray5))
+                        .cornerRadius(10)
                         .padding(.all)
                     }
                     .padding(.all, 15)
@@ -335,13 +352,9 @@ struct Main: View {
                     }
                 }
                 .background(Color(UIColor.systemBackground))
-                
+                .navigationBarTitle("DoorOpener")
             }
-            .onAppear(perform: {
-                //                global.userInfoLoad()
-            })
         }
-        
     }
 }
 
@@ -371,27 +384,33 @@ struct Settings: View {
                             }
                         }
                     }
-                    //                    Section {
-                    //                        NavigationLink(destination: Text("Hello, world!")) {
-                    //                            Text("사용자 초대")
-                    //                        }
-                    //                        NavigationLink(destination: Text("Hello, world!")) {
-                    //                            Text("임시 키 발급")
-                    //                        }
-                    //                        NavigationLink(destination: Text("Hello, world!")) {
-                    //                            Text("잠금 해제 기록")
-                    //                        }
-                    //                    }
-                    //                    Section {
-                    //                        NavigationLink(destination: Text("Hello, world!")) {
-                    //                            Text("단축어 앱에 추가")
-                    //                        }
-                    //                    }
-                    //                    Section {
-                    //                        NavigationLink(destination: Text("Hello, world!")) {
-                    //                            Text("시스템 정보")
-                    //                        }
-                    //                    }
+//                    Section {
+//                        NavigationLink(destination: Text("Hello, world!")) {
+//                            Text("사용자 초대")
+//                        }
+//                        NavigationLink(destination: Text("Hello, world!")) {
+//                            Text("임시 키 발급")
+//                        }
+//                        NavigationLink(destination: Text("Hello, world!")) {
+//                            Text("잠금 해제 기록")
+//                        }
+//                    }
+//                    Section {
+//                        NavigationLink(destination: Text("Hello, world!")) {
+//                            Text("단축어 앱에 추가")
+//                        }
+//                    }
+//                    Section {
+//                        NavigationLink(destination: Text("Hello, world!")) {
+//                            Text("시스템 정보")
+//                        }
+//                    }
+//                    Section {
+//                        NavigationLink(destination: Test()) {
+//                            Text("슬라이더 테스트")
+//                        }
+//                    }
+                    
                     Section {
                         Toggle("테스트 모드", isOn: $isTest)
                     }
@@ -840,12 +859,23 @@ struct Open: View {
     }
 }
 
+//struct Test: View {
+//    
+//    var body: some View {
+//        VStack {
+// 
+//        }
+//        .navigationBarTitle("사용자 정보", displayMode: .inline)
+//        
+//    }
+//}
 
 struct SwiftUIView_Previews: PreviewProvider {
     static var previews: some View {
         @State var loginSuccessful = false
 //        Login(loginSuccessful: $loginSuccessful)
         ParentView()
+//        Test()
             .environmentObject(UserData())
             .environmentObject(ViewModel())
             .environmentObject(Global())
