@@ -101,21 +101,25 @@ struct Login: View {
     @State private var showingAlert = false  // 알림 표시 여부를 결정하는 새로운 @State 변수
     
     var body: some View {
+        
         VStack {
             if loginSuccessful {
                 ParentView()
             } else {
                 Text("DoorOpener")
-                    .font(.title)
-                    .fontWeight(.black)
+                    .font(.largeTitle)
+                    .fontWeight(.heavy)
+                    .padding(/*@START_MENU_TOKEN@*/.all, 30.0/*@END_MENU_TOKEN@*/)
                 
-                TextField("이메일", text: $email)
-                    .padding()
-                    .border(Color.gray, width: 0.5)
-                
-                SecureField("비밀번호", text: $password)
-                    .padding()
-                    .border(Color.gray, width: 0.5)
+                Group {
+                    TextField("이메일", text: $email)
+                        .padding()
+                        .background(RoundedRectangle(cornerRadius: 10).fill(Color(UIColor.secondarySystemBackground)))
+                    
+                    SecureField("비밀번호", text: $password)
+                        .padding()
+                        .background(RoundedRectangle(cornerRadius: 10).fill(Color(UIColor.secondarySystemBackground)))
+                }
                 
                 Button(action: {
                     // 로그인 요청을 보냅니다.
@@ -189,11 +193,13 @@ struct Login: View {
                     Text("로그인")
                         .foregroundColor(.white)
                         .padding()
+                        .frame(width: 100)
                         .background(Color.blue)
                         .cornerRadius(10)
                 }
+                .padding(/*@START_MENU_TOKEN@*/.all, 30.0/*@END_MENU_TOKEN@*/)
                 .alert(isPresented: $showingAlert) {  // 알림을 표시하는 alert 수정자
-                    Alert(title: Text("로그인 실패"), message: Text("로그인이 실패했습니다."), dismissButton: .default(Text("확인")))
+                    Alert(title: Text("로그인 실패"), message: Text("이메일과 비밀번호를 다시 확인해주세요."), dismissButton: .default(Text("확인")))
                 }
             }
         }
@@ -837,6 +843,8 @@ struct Open: View {
 
 struct SwiftUIView_Previews: PreviewProvider {
     static var previews: some View {
+        @State var loginSuccessful = false
+//        Login(loginSuccessful: $loginSuccessful)
         ParentView()
             .environmentObject(UserData())
             .environmentObject(ViewModel())
