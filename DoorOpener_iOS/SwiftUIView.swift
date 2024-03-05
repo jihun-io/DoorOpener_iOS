@@ -284,6 +284,8 @@ struct Main: View {
     @EnvironmentObject var global: Global
     @EnvironmentObject var userData: UserData
     
+    @AppStorage("isTest") var isTest: Bool = false
+    
     @State private var showingOpen = false
     @State private var animStart = false
     @State private var lastLocation = CGSize.zero
@@ -364,6 +366,11 @@ struct Main: View {
                         .background(Color(.systemGray5))
                         .cornerRadius(10)
                         .padding(.all)
+                        if isTest {
+                            Text("테스트 모드입니다!")
+                                .font(.caption)
+                                .foregroundColor(Color.gray)
+                        }
                     }
                     .padding(.all, 15)
                     .background(Color(UIColor.secondarySystemBackground))
@@ -385,7 +392,7 @@ struct Main: View {
                 //                print("remainDistance: \(remainDistance)")
                 let remainPercent = -((1 - Double(remainDistance + 67) / 67) * 100) / 3.5
                 let remainTime = remainPercent / 100
-                print ("추가 시간: \(remainTime)")
+//                print ("추가 시간: \(remainTime)")
                 DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + remainTime) {
                     let impactMed = UIImpactFeedbackGenerator(style: .light)
                     impactMed.impactOccurred()
