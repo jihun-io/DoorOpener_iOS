@@ -12,11 +12,15 @@ class ViewModel: ObservableObject {
 }
 
 class Setup: ObservableObject {
-//    @Published var isTest: Bool = false
+    //    @Published var isTest: Bool = false
 } //혹시 모르니 남겨두자...
 
 class Destination: ObservableObject {
     @Published var destinationLink: String = ""
+}
+
+class Taptic: ObservableObject {
+    @Published var isTap = false
 }
 
 class Global: ObservableObject {
@@ -281,11 +285,15 @@ struct Main: View {
     @EnvironmentObject var userData: UserData
     
     @State private var showingOpen = false
+    @State private var animStart = false
+    @State private var lastLocation = CGSize.zero
+    @State private var animEnd = false
+    @State private var remainDistance = 0.0
     
     @State private var loginSuccessful = UserDefaults.standard.bool(forKey: "loginSuccessful")
     
     @State private var dragAmount = CGSize.zero
-
+    
     
     var body: some View {
         Group {
@@ -326,12 +334,25 @@ struct Main: View {
                                                     self.dragAmount = CGSize(width: min( max($0.translation.width, 0), 147), height: 0)
                                                 }
                                                 .onEnded { value in
-                                                    if value.predictedEndTranslation.width > 146 {
-                                                        self.showingOpen = true
+                                                    if dragAmount.width > 80 {
+                                                        self.animStart = true
                                                         
+                                                    } else if value.predictedEndLocation.x > 147 {
+                                                        //                                                        print(value.predictedEndLocation.x)
                                                     }
                                                     withAnimation {
-                                                        self.dragAmount = .zero
+                                                        remainDistance = -dragAmount.width + 147
+                                                        lastLocation = dragAmount
+                                                        if animStart == true {
+                                                            if dragAmount.width == 147 {
+                                                                animEnd = true
+                                                            } else {
+                                                                self.dragAmount = CGSize(width: 147, height: 0)
+                                                                animEnd = true
+                                                            }
+                                                        } else {
+                                                            self.dragAmount = .zero
+                                                        }
                                                     }
                                                 }
                                         )
@@ -355,6 +376,31 @@ struct Main: View {
                 .navigationBarTitle("DoorOpener")
             }
         }
+        .onChange (of: self.animEnd, perform: { value in
+            if value == true {
+                self.animStart = false
+                self.animEnd = false
+                //                print("lastLocation: \(lastLocation)")
+                //                Double(dragAmount.width / 70)
+                //                print("remainDistance: \(remainDistance)")
+                let remainPercent = -((1 - Double(remainDistance + 67) / 67) * 100) / 3.5
+                let remainTime = remainPercent / 100
+                print ("추가 시간: \(remainTime)")
+                DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + remainTime) {
+                    let impactMed = UIImpactFeedbackGenerator(style: .light)
+                    impactMed.impactOccurred()
+                
+                    showingOpen = true
+                    DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.5) {
+                        dragAmount = .zero
+                    }
+                    
+                }
+                //                print("animStart: \(animStart), animEnd: \(animEnd)")
+                
+            }
+        })
+        
     }
 }
 
@@ -384,32 +430,32 @@ struct Settings: View {
                             }
                         }
                     }
-//                    Section {
-//                        NavigationLink(destination: Text("Hello, world!")) {
-//                            Text("사용자 초대")
-//                        }
-//                        NavigationLink(destination: Text("Hello, world!")) {
-//                            Text("임시 키 발급")
-//                        }
-//                        NavigationLink(destination: Text("Hello, world!")) {
-//                            Text("잠금 해제 기록")
-//                        }
-//                    }
-//                    Section {
-//                        NavigationLink(destination: Text("Hello, world!")) {
-//                            Text("단축어 앱에 추가")
-//                        }
-//                    }
-//                    Section {
-//                        NavigationLink(destination: Text("Hello, world!")) {
-//                            Text("시스템 정보")
-//                        }
-//                    }
-//                    Section {
-//                        NavigationLink(destination: Test()) {
-//                            Text("슬라이더 테스트")
-//                        }
-//                    }
+                    //                    Section {
+                    //                        NavigationLink(destination: Text("Hello, world!")) {
+                    //                            Text("사용자 초대")
+                    //                        }
+                    //                        NavigationLink(destination: Text("Hello, world!")) {
+                    //                            Text("임시 키 발급")
+                    //                        }
+                    //                        NavigationLink(destination: Text("Hello, world!")) {
+                    //                            Text("잠금 해제 기록")
+                    //                        }
+                    //                    }
+                    //                    Section {
+                    //                        NavigationLink(destination: Text("Hello, world!")) {
+                    //                            Text("단축어 앱에 추가")
+                    //                        }
+                    //                    }
+                    //                    Section {
+                    //                        NavigationLink(destination: Text("Hello, world!")) {
+                    //                            Text("시스템 정보")
+                    //                        }
+                    //                    }
+                    //                    Section {
+                    //                        NavigationLink(destination: Test()) {
+                    //                            Text("슬라이더 테스트")
+                    //                        }
+                    //                    }
                     
                     Section {
                         Toggle("테스트 모드", isOn: $isTest)
@@ -768,12 +814,17 @@ struct LargeProgressViewStyle: ProgressViewStyle {
 }
 
 struct OpeningDoorView: View {
+    @EnvironmentObject var taptic: Taptic
     var body: some View {
         VStack {
             ProgressView()
                 .padding(/*@START_MENU_TOKEN@*/.all/*@END_MENU_TOKEN@*/)
                 .progressViewStyle(LargeProgressViewStyle())
             Text("문을 여는 중입니다...")
+                .onAppear {
+                    taptic.isTap = true
+//                    print(taptic.isTap)
+                }
         }
     }
 }
@@ -783,6 +834,8 @@ struct DoorOpenedView: View {
     @EnvironmentObject var userData: UserData
     
     @AppStorage("isTest") var isTest: Bool = false
+    
+    @EnvironmentObject var taptic: Taptic
     
     
     var body: some View {
@@ -827,6 +880,16 @@ struct DoorOpenedView: View {
             }
             .background(Color(UIColor.systemBackground))
         }
+        .onAppear {
+//            print(taptic.isTap)
+            if taptic.isTap {
+                let impactMed = UIImpactFeedbackGenerator(style: .heavy)
+                impactMed.impactOccurred()
+                taptic.isTap = false
+                
+            }
+            
+        }
     }
 }
 
@@ -851,34 +914,35 @@ struct Open: View {
                 global.openDoor()
             }
         })
-//        .onAppear(perform: {
-//            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-//                global.openDoor()
-//            }
-//        })
+        //        .onAppear(perform: {
+        //            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+        //                global.openDoor()
+        //            }
+        //        })
     }
 }
 
 //struct Test: View {
-//    
+//
 //    var body: some View {
 //        VStack {
-// 
+//
 //        }
 //        .navigationBarTitle("사용자 정보", displayMode: .inline)
-//        
+//
 //    }
 //}
 
 struct SwiftUIView_Previews: PreviewProvider {
     static var previews: some View {
         @State var loginSuccessful = false
-//        Login(loginSuccessful: $loginSuccessful)
+        //        Login(loginSuccessful: $loginSuccessful)
         ParentView()
-//        Test()
+        //        Test()
             .environmentObject(UserData())
             .environmentObject(ViewModel())
             .environmentObject(Global())
+            .environmentObject(Taptic())
             .environmentObject(Setup())
             .onOpenURL { url in
                 if url.absoluteString == "dooropener://open" {

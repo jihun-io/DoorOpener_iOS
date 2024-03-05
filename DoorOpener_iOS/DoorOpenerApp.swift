@@ -14,6 +14,7 @@ struct DoorOpenerApp: App {
     @StateObject var userData = UserData()
     @StateObject var global = Global()
     @StateObject var setup = Setup()
+    @StateObject var taptic = Taptic()
 
     var body: some Scene {
         WindowGroup {
@@ -22,6 +23,7 @@ struct DoorOpenerApp: App {
                 .environmentObject(viewModel)
                 .environmentObject(global)
                 .environmentObject(setup)
+                .environmentObject(taptic)
                 .onOpenURL { url in
                     if url.absoluteString == "dooropener://open" {
                         print(url)
