@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Foundation
 
 class ViewModel: ObservableObject {
     @Published var showOpenView = false
@@ -53,9 +54,16 @@ class Global: ObservableObject {
                           let doorOpenRange = Range(doorOpenMatch.range(at: 1), in: str) {
                     let doorOpenMessage = String(str[doorOpenRange])
                     
+                    let now = Date()
+                    let formatter = DateFormatter()
+                    formatter.timeZone = TimeZone(identifier: "Asia/Seoul")
+                    formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+                    let kstTime = formatter.string(from: now)
+                    
+                    
                     DispatchQueue.main.async {
                         self.doorStatus = doorOpenMessage
-                        print("문 상태 업데이트 완료: \(self.doorStatus)")
+                        print("\(kstTime) 문 상태 업데이트 완료: \(self.doorStatus)")
                     }
                 }
             }.resume()
@@ -325,6 +333,7 @@ struct Main: View {
                                 .frame(width: 200.0)
                                 HStack {
                                     Image(systemName: "arrowshape.right.fill")
+                                        .foregroundColor(Color.black)
                                         .padding(/*@START_MENU_TOKEN@*/.all/*@END_MENU_TOKEN@*/)
                                         .fontWeight(.bold)
                                         .background(Color(.systemYellow))
