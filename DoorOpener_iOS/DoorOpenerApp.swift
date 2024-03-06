@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import WatchConnectivity
 
 @main
 struct DoorOpenerApp: App {
@@ -13,6 +14,7 @@ struct DoorOpenerApp: App {
     
     @StateObject var userData = UserData()
     @StateObject var global = Global()
+    @StateObject var syncwithapplewatch = SyncWithAppleWatch()
     @StateObject var setup = Setup()
     @StateObject var taptic = Taptic()
 
@@ -24,6 +26,7 @@ struct DoorOpenerApp: App {
                 .environmentObject(global)
                 .environmentObject(setup)
                 .environmentObject(taptic)
+                .environmentObject(syncwithapplewatch)
                 .onOpenURL { url in
                     if url.absoluteString == "dooropener://open" {
                         print(url)
