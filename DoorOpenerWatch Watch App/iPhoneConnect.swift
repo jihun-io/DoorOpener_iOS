@@ -88,7 +88,7 @@ struct Login: View {
                 Text("iPhone의 DoorOpener 앱에서 먼저 로그인을 진행하십시오.")
                     .multilineTextAlignment(.center)
                     .padding(/*@START_MENU_TOKEN@*/.all/*@END_MENU_TOKEN@*/)
-                Text("Received: \(iphoneconnectmanager.receivedMessage)")
+//                Text("Received: \(iphoneconnectmanager.receivedMessage)")
             }
             .navigationBarTitle("DoorOpener")
             .onReceive(iphoneconnectmanager.$receivedMessage) { newValue in

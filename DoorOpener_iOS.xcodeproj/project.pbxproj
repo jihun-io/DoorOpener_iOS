@@ -25,6 +25,7 @@
 		CEB0E6582B99113A00C3B991 /* iPhoneConnect.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEB0E6572B99113A00C3B991 /* iPhoneConnect.swift */; };
 		CEB0E65A2B991D6900C3B991 /* DoorOpener.app in Resources */ = {isa = PBXBuildFile; fileRef = CEB0E6592B991C2000C3B991 /* DoorOpener.app */; };
 		CEB0E65B2B99202400C3B991 /* DoorOpener.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = CEB0E6592B991C2000C3B991 /* DoorOpener.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		CEB0E6602B992DD000C3B991 /* DoorOpenerWatchClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEB0E65F2B992DD000C3B991 /* DoorOpenerWatchClass.swift */; };
 		CEC1AB0B2B9850940056CE97 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = CEC1AB0A2B9850940056CE97 /* Launch Screen.storyboard */; };
 		CECF22662B985BFC00F7A0C9 /* DoorOpenerWatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = CECF22652B985BFC00F7A0C9 /* DoorOpenerWatchApp.swift */; };
 		CECF22682B985BFC00F7A0C9 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CECF22672B985BFC00F7A0C9 /* ContentView.swift */; };
@@ -77,6 +78,7 @@
 		CEB0E6572B99113A00C3B991 /* iPhoneConnect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iPhoneConnect.swift; sourceTree = "<group>"; };
 		CEB0E6592B991C2000C3B991 /* DoorOpener.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DoorOpener.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CEB0E65C2B99202400C3B991 /* DoorOpener.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DoorOpener.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		CEB0E65F2B992DD000C3B991 /* DoorOpenerWatchClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DoorOpenerWatchClass.swift; sourceTree = "<group>"; };
 		CEC1AB0A2B9850940056CE97 /* Launch Screen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
 		CECF22652B985BFC00F7A0C9 /* DoorOpenerWatchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DoorOpenerWatchApp.swift; sourceTree = "<group>"; };
 		CECF22672B985BFC00F7A0C9 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -146,6 +148,7 @@
 				CECF22652B985BFC00F7A0C9 /* DoorOpenerWatchApp.swift */,
 				CECF22672B985BFC00F7A0C9 /* ContentView.swift */,
 				CEB0E6572B99113A00C3B991 /* iPhoneConnect.swift */,
+				CEB0E65F2B992DD000C3B991 /* DoorOpenerWatchClass.swift */,
 				CECF22692B985BFE00F7A0C9 /* Assets.xcassets */,
 				CECF226B2B985BFE00F7A0C9 /* Preview Content */,
 			);
@@ -296,6 +299,7 @@
 				CECF22682B985BFC00F7A0C9 /* ContentView.swift in Sources */,
 				CEB0E6582B99113A00C3B991 /* iPhoneConnect.swift in Sources */,
 				CECF22662B985BFC00F7A0C9 /* DoorOpenerWatchApp.swift in Sources */,
+				CEB0E6602B992DD000C3B991 /* DoorOpenerWatchClass.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

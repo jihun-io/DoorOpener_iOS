@@ -19,7 +19,6 @@ struct ParentView: View {
 
     var body: some View {
         VStack {
-//            Login()
             if loggedIn {
                 ContentView()
             } else {
@@ -32,13 +31,18 @@ struct ParentView: View {
 struct ContentView: View {
     @AppStorage("user_name") var userName: String = ""
     
+    var global = Global()
+    
     var body: some View {
         NavigationStack {
             VStack {
-                Text("\(userName)님, 환영합니다!")
+                Spacer()
+                Text("\(userName)님, \n안녕하세요?")
+                    .font(.title3)
                     .multilineTextAlignment(.leading)
                     .padding(/*@START_MENU_TOKEN@*/.all/*@END_MENU_TOKEN@*/)
-                NavigationLink(destination: Open()) {
+                Spacer()
+                NavigationLink(destination: Open().environmentObject(global)) {
                     HStack {
                         Image(systemName: "key.horizontal.fill")
                         Text("문 열기")
@@ -51,24 +55,79 @@ struct ContentView: View {
     }
 }
 
-struct Open: View {
+struct OpeningDoorView: View {
+    @EnvironmentObject var taptic: Taptic
     var body: some View {
         VStack {
-//            Text(watchSessionManager.result)
+            ProgressView()
+                .scaleEffect(x: 2, y: 2, anchor: .center)
+            Text("문을 여는 중입니다...")
+                .onAppear {
+                    taptic.isTap = true
+                }
+        }
+    }
+}
+
+struct DoorOpenedView: View {
+    @AppStorage("isTest") var isTest: Bool = false
+    @AppStorage("user_name") var userName: String = ""
+
+    
+    @EnvironmentObject var taptic: Taptic
+    
+    
+    var body: some View {
+        VStack {
+            Text("\(userName) 님,\n환영합니다!")
+                .font(.title2)
+                .padding(.bottom)
+            Text("문을 열었습니다.")
+                .padding(.top)
+            if isTest {
+                Text("테스트 모드입니다.\n실제로 문이 열리지 않았습니다.")
+            }
         }
         .onAppear {
-            if WCSession.default.isReachable {
-                WCSession.default.sendMessage(["request": "startWork"], replyHandler: nil, errorHandler: nil)
+            if taptic.isTap {
+                WKInterfaceDevice.current().play(.success)
+                taptic.isTap = false
             }
         }
     }
 }
 
+struct Open: View {
+    @EnvironmentObject var global: Global
+    
+    var taptic = Taptic()
+
+    
+    var body: some View {
+        VStack {
+            if global.doorStatus == "문을 여는 중입니다..." {
+                OpeningDoorView().environmentObject(taptic)
+            } else if global.doorStatus == "문을 열었습니다." {
+                DoorOpenedView().environmentObject(taptic)
+            } else {
+                Text(global.doorStatus)
+            }
+        }
+        .onAppear(perform: {
+            DispatchQueue.main.async {
+                global.openDoor()
+            }
+        })
+    }
+}
+
 
 struct SwiftUIView_Previews: PreviewProvider {
+    
     static var previews: some View {
-        ParentView()
-//        ContentView()
-//            .environmentObject(WatchSessionManager())
+        ContentView()
+//        OpeningDoorView()
+//            .environmentObject(Taptic())
+//        ParentView()
     }
 }
