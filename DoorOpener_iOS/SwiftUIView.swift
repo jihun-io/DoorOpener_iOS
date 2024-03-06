@@ -84,6 +84,10 @@ struct LoginWithAppleWatch: View {
 }
 
 struct AWLoading: View {
+    @EnvironmentObject var syncwithapplewatch: SyncWithAppleWatch
+    @StateObject var applewatchconnect = WatchConnectManager()
+    @State var isGet = false
+    @State var token = ""
 
     var body: some View {
         VStack {
@@ -92,7 +96,14 @@ struct AWLoading: View {
                 .progressViewStyle(LargeProgressViewStyle())
             Text("Apple Watch와 계정을 연동 중입니다...")
                 .onAppear {
-
+                    loadToken(from: "https://dooropener.jihun.io/applewatch/generate") { pText in
+                        if let pText = pText {
+                            isGet = true
+                            token = pText
+                            print(token)
+                            applewatchconnect.sendMessage(token)
+                        }
+                    }
                 }
         }
     }

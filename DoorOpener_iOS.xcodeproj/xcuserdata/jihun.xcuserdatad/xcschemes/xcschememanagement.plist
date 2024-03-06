@@ -9,10 +9,20 @@
 			<key>orderHint</key>
 			<integer>0</integer>
 		</dict>
+		<key>DoorOpenerWatch Watch App.xcscheme_^#shared#^_</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>1</integer>
+		</dict>
 	</dict>
 	<key>SuppressBuildableAutocreation</key>
 	<dict>
 		<key>CE0020772B947B0A00F3E3D3</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>CECF22622B985BFC00F7A0C9</key>
 		<dict>
 			<key>primary</key>
 			<true/>
