@@ -39,62 +39,79 @@ struct Main: View {
                             .frame(width: 200.0)
                         Spacer()
                             .frame(height: 50)
-                        HStack {
-                            ZStack {
+                        if ProcessInfo.processInfo.isMacCatalystApp {
+                            Button(action: {
+                                self.showingOpen = true
+                            }) {
                                 HStack {
-                                    Spacer()
-                                    Text("밀어서 잠금 해제")
-                                        .fontWeight(.bold)
-                                        .multilineTextAlignment(.center)
-                                        .padding(.trailing, 20.0)
-                                        .opacity(1 - Double(dragAmount.width / 70))
-                                    
+                                    Image(systemName: "key.horizontal.fill")
+                                    Text("문 열기")
                                 }
-                                .frame(width: 200.0)
-                                HStack {
-                                    Image(systemName: "arrowshape.right.fill")
-                                        .foregroundColor(Color.black)
-                                        .padding(/*@START_MENU_TOKEN@*/.all/*@END_MENU_TOKEN@*/)
-                                        .fontWeight(.bold)
-                                        .background(Color(.systemYellow))
-                                        .cornerRadius(10)
-                                        .offset(x: dragAmount.width, y: 0)
-                                        .gesture(
-                                            DragGesture()
-                                                .onChanged {
-                                                    self.dragAmount = CGSize(width: min( max($0.translation.width, 0), 147), height: 0)
-                                                }
-                                                .onEnded { value in
-                                                    if dragAmount.width > 80 {
-                                                        self.animStart = true
-                                                        
-                                                    } else if value.predictedEndLocation.x > 147 {
-                                                        //                                                        print(value.predictedEndLocation.x)
+                                
+                                .foregroundColor(.black)
+                                .padding()
+                                .background(Color.yellow)
+                                .cornerRadius(10)
+                                .navigationBarTitle("DoorOpener")
+                            }
+                        } else {
+                            HStack {
+                                ZStack {
+                                    HStack {
+                                        Spacer()
+                                        Text("밀어서 잠금 해제")
+                                            .fontWeight(.bold)
+                                            .multilineTextAlignment(.center)
+                                            .padding(.trailing, 20.0)
+                                            .opacity(1 - Double(dragAmount.width / 70))
+                                        
+                                    }
+                                    .frame(width: 200.0)
+                                    HStack {
+                                        Image(systemName: "arrowshape.right.fill")
+                                            .foregroundColor(Color.black)
+                                            .padding(/*@START_MENU_TOKEN@*/.all/*@END_MENU_TOKEN@*/)
+                                            .fontWeight(.bold)
+                                            .background(Color(.systemYellow))
+                                            .cornerRadius(10)
+                                            .offset(x: dragAmount.width, y: 0)
+                                            .gesture(
+                                                DragGesture()
+                                                    .onChanged {
+                                                        self.dragAmount = CGSize(width: min( max($0.translation.width, 0), 147), height: 0)
                                                     }
-                                                    withAnimation {
-                                                        remainDistance = -dragAmount.width + 147
-                                                        lastLocation = dragAmount
-                                                        if animStart == true {
-                                                            if dragAmount.width == 147 {
-                                                                animEnd = true
+                                                    .onEnded { value in
+                                                        if dragAmount.width > 80 {
+                                                            self.animStart = true
+                                                            
+                                                        } else if value.predictedEndLocation.x > 147 {
+                                                            //                                                        print(value.predictedEndLocation.x)
+                                                        }
+                                                        withAnimation {
+                                                            remainDistance = -dragAmount.width + 147
+                                                            lastLocation = dragAmount
+                                                            if animStart == true {
+                                                                if dragAmount.width == 147 {
+                                                                    animEnd = true
+                                                                } else {
+                                                                    self.dragAmount = CGSize(width: 147, height: 0)
+                                                                    animEnd = true
+                                                                }
                                                             } else {
-                                                                self.dragAmount = CGSize(width: 147, height: 0)
-                                                                animEnd = true
+                                                                self.dragAmount = .zero
                                                             }
-                                                        } else {
-                                                            self.dragAmount = .zero
                                                         }
                                                     }
-                                                }
-                                        )
-                                    Spacer()
+                                            )
+                                        Spacer()
+                                    }
+                                    .frame(width: 200.0)
                                 }
-                                .frame(width: 200.0)
                             }
+                            .background(Color(.systemGray5))
+                            .cornerRadius(10)
+                            .padding(.all)
                         }
-                        .background(Color(.systemGray5))
-                        .cornerRadius(10)
-                        .padding(.all)
                         if isTest {
                             Text("테스트 모드입니다!")
                                 .font(.caption)

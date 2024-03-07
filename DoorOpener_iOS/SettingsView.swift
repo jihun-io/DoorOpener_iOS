@@ -33,9 +33,13 @@ struct Settings: View {
                             }
                         }
                     }
-                    Section {
-                        NavigationLink(destination: LoginWithAppleWatch()) {
-                            Text("Apple Watch에 로그인")
+                    if ProcessInfo.processInfo.isMacCatalystApp {
+
+                    } else {
+                        Section {
+                            NavigationLink(destination: LoginWithAppleWatch()) {
+                                Text("Apple Watch에 로그인")
+                            }
                         }
                     }
                     //                        NavigationLink(destination: Text("Hello, world!")) {
