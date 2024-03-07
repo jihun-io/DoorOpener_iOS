@@ -87,6 +87,10 @@ struct Login: View {
                                                     UserDefaults.standard.set(true, forKey: "loginSuccessful")
                                                     self.loginSuccessful = true
                                                     print("로그인성공!!!!!!!!!!")
+                                                    if UserDefaults.standard.bool(forKey: "loginSuccessful") {
+                                                        print("로그인값이 트루다!")
+                                                        UIApplication.shared.registerForRemoteNotifications()
+                                                    }
                                                 }
                                             }
                                         }

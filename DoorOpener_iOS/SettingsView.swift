@@ -59,11 +59,11 @@ struct Settings: View {
                     //                            Text("시스템 정보")
                     //                        }
                     //                    }
-                    //                    Section {
-                    //                        NavigationLink(destination: Test()) {
-                    //                            Text("슬라이더 테스트")
-                    //                        }
-                    //                    }
+//                    Section {
+//                        NavigationLink(destination: TokenTest()) {
+//                            Text("알림 토큰 확인하기")
+//                        }
+//                    }
                     
                     Section {
                         Toggle("테스트 모드", isOn: $isTest)
@@ -408,4 +408,16 @@ struct ModifyPassword: View {
             }
         }
     }
+}
+
+struct TokenTest: View {
+    var body: some View {
+        Group {
+            Text("Hello, world!")
+        }
+        .onAppear {
+            
+        }
+    }
+
 }

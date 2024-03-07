@@ -37,6 +37,12 @@ struct ParentView: View {
                 Login(loginSuccessful: $loginSuccessful)
             }
         }
+        .onAppear {
+            if UserDefaults.standard.bool(forKey: "loginSuccessful") {
+                print("로그인값이 트루다!")
+                UIApplication.shared.registerForRemoteNotifications()
+            }
+        }
     }
 }
 

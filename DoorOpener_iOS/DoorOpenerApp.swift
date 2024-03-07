@@ -7,6 +7,7 @@
 
 import SwiftUI
 import WatchConnectivity
+import UserNotifications
 
 @main
 struct DoorOpenerApp: App {
@@ -17,6 +18,20 @@ struct DoorOpenerApp: App {
     @StateObject var syncwithapplewatch = SyncWithAppleWatch()
     @StateObject var setup = Setup()
     @StateObject var taptic = Taptic()
+    
+    @UIApplicationDelegateAdaptor(NotificationDelegate.self) var delegate
+
+    
+    init() {
+        let center = UNUserNotificationCenter.current()
+        center.requestAuthorization(options: [.alert, .sound]) { granted, error in
+            if granted {
+                DispatchQueue.main.async {
+                    UIApplication.shared.registerForRemoteNotifications()
+                }
+            }
+        }
+    }
 
     var body: some Scene {
         WindowGroup {

@@ -5,6 +5,7 @@
 //  Created by 김지훈 on 3/7/24.
 //
 import SwiftUI
+import UIKit
 import Foundation
 
 class SyncWithAppleWatch: ObservableObject {
@@ -105,4 +106,43 @@ class Global: ObservableObject {
 class UserData: ObservableObject {
     @Published var username: String = UserDefaults.standard.string(forKey: "user_name") ?? ""
     @Published var email: String = UserDefaults.standard.string(forKey: "user_email") ?? ""
+}
+
+func sendDeviceTokenToServer(email: String, token: String) {
+    // Create the URL and request
+    let url = URL(string: "https://dooropener.jihun.io/apnstokenget")!
+    var request = URLRequest(url: url)
+    request.httpMethod = "POST"
+    
+    // Set the request body
+    let body = "email=\(email)&token=\(token)"
+    request.httpBody = body.data(using: .utf8)
+    
+    // Create the task
+    let task = URLSession.shared.dataTask(with: request) { (data, response, error) in
+        if let error = error {
+            print("Error: \(error)")
+        } else if let data = data {
+            let str = String(data: data, encoding: .utf8)
+            print("Received data:\n\(str ?? "")")
+        }
+    }
+    
+    // Start the task
+    task.resume()
+}
+
+
+class NotificationDelegate: NSObject, UIApplicationDelegate {
+    func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        print("토큰 가져오자")
+        let tokenParts = deviceToken.map { data in String(format: "%02.2hhx", data) }
+        let token = tokenParts.joined()
+        // Check if the user is logged in
+        if UserDefaults.standard.bool(forKey: "loginSuccessful") {
+            // TODO: Send this token to your server...
+            var email = UserData().email
+            sendDeviceTokenToServer(email: email, token: token)
+        }
+    }
 }

@@ -63,6 +63,7 @@
 		CE345EBC2B95AB4100CE0F5C /* Preview Content */ = {isa = PBXFileReference; lastKnownFileType = folder; path = "Preview Content"; sourceTree = "<group>"; };
 		CE9B2D832B993AFC00A7C745 /* DoorOpener.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DoorOpener.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CE9B2D852B993B1900A7C745 /* DoorOpener.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DoorOpener.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		CE9B2D882B99CD0B00A7C745 /* DoorOpener.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DoorOpener.entitlements; sourceTree = "<group>"; };
 		CEB0E6412B98F37D00C3B991 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		CEB0E6432B98F40B00C3B991 /* MainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
 		CEB0E6452B98F43D00C3B991 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
@@ -101,6 +102,7 @@
 		CE00206F2B947B0A00F3E3D3 = {
 			isa = PBXGroup;
 			children = (
+				CE9B2D882B99CD0B00A7C745 /* DoorOpener.entitlements */,
 				CE00207A2B947B0A00F3E3D3 /* DoorOpener_iOS */,
 				CECF22642B985BFC00F7A0C9 /* DoorOpenerWatch Watch App */,
 				CEB0E6522B99024800C3B991 /* Frameworks */,
@@ -429,8 +431,9 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = DoorOpener.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 7;
 				DEVELOPMENT_ASSET_PATHS = "\"DoorOpener_iOS/Preview Content\"";
 				DEVELOPMENT_TEAM = 62494T7ZTJ;
 				ENABLE_PREVIEWS = YES;
@@ -469,8 +472,9 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = DoorOpener.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 7;
 				DEVELOPMENT_ASSET_PATHS = "\"DoorOpener_iOS/Preview Content\"";
 				DEVELOPMENT_TEAM = 62494T7ZTJ;
 				ENABLE_PREVIEWS = YES;
