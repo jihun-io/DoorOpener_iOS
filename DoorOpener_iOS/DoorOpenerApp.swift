@@ -19,8 +19,7 @@ struct DoorOpenerApp: App {
     @StateObject var setup = Setup()
     @StateObject var taptic = Taptic()
     
-    @UIApplicationDelegateAdaptor(NotificationDelegate.self) var delegate
-
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     
     init() {
         let center = UNUserNotificationCenter.current()

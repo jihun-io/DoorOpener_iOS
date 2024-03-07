@@ -133,7 +133,12 @@ func sendDeviceTokenToServer(email: String, token: String) {
 }
 
 
-class NotificationDelegate: NSObject, UIApplicationDelegate {
+class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        UNUserNotificationCenter.current().delegate = self
+        return true
+    }
+
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
         print("토큰 가져오자")
         let tokenParts = deviceToken.map { data in String(format: "%02.2hhx", data) }
@@ -144,5 +149,9 @@ class NotificationDelegate: NSObject, UIApplicationDelegate {
             var email = UserData().email
             sendDeviceTokenToServer(email: email, token: token)
         }
+    }
+
+    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+        completionHandler([.banner, .list, .sound])
     }
 }
