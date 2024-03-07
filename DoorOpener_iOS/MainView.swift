@@ -113,7 +113,7 @@ struct Main: View {
                             .padding(.all)
                         }
                         if isTest {
-                            Text("테스트 모드입니다!")
+                            Text("테스트 모드입니다!\n잠금을 해제해도 문이 열리지 않습니다.")
                                 .font(.caption)
                                 .foregroundColor(Color.gray)
                         }
