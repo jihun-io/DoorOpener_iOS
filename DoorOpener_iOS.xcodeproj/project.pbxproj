@@ -14,6 +14,7 @@
 		CE08AFC02B987F1A00931E7E /* Preview Content in Resources */ = {isa = PBXBuildFile; fileRef = CE345EBC2B95AB4100CE0F5C /* Preview Content */; };
 		CE08AFC12B987F1F00931E7E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CECF22692B985BFE00F7A0C9 /* Assets.xcassets */; };
 		CE345EBD2B95AB4100CE0F5C /* Preview Content in Resources */ = {isa = PBXBuildFile; fileRef = CE345EBC2B95AB4100CE0F5C /* Preview Content */; };
+		CE9B2D842B993B1800A7C745 /* DoorOpener.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = CE9B2D832B993AFC00A7C745 /* DoorOpener.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		CEB0E6422B98F37D00C3B991 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEB0E6412B98F37D00C3B991 /* LoginView.swift */; };
 		CEB0E6442B98F40B00C3B991 /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEB0E6432B98F40B00C3B991 /* MainView.swift */; };
 		CEB0E6462B98F43D00C3B991 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEB0E6452B98F43D00C3B991 /* SettingsView.swift */; };
@@ -23,8 +24,6 @@
 		CEB0E6542B99024800C3B991 /* SwiftSoup in Frameworks */ = {isa = PBXBuildFile; productRef = CEB0E6532B99024800C3B991 /* SwiftSoup */; };
 		CEB0E6562B99027C00C3B991 /* AppleWatchConnect.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEB0E6552B99027C00C3B991 /* AppleWatchConnect.swift */; };
 		CEB0E6582B99113A00C3B991 /* iPhoneConnect.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEB0E6572B99113A00C3B991 /* iPhoneConnect.swift */; };
-		CEB0E65A2B991D6900C3B991 /* DoorOpener.app in Resources */ = {isa = PBXBuildFile; fileRef = CEB0E6592B991C2000C3B991 /* DoorOpener.app */; };
-		CEB0E65B2B99202400C3B991 /* DoorOpener.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = CEB0E6592B991C2000C3B991 /* DoorOpener.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		CEB0E6602B992DD000C3B991 /* DoorOpenerWatchClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEB0E65F2B992DD000C3B991 /* DoorOpenerWatchClass.swift */; };
 		CEC1AB0B2B9850940056CE97 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = CEC1AB0A2B9850940056CE97 /* Launch Screen.storyboard */; };
 		CECF22662B985BFC00F7A0C9 /* DoorOpenerWatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = CECF22652B985BFC00F7A0C9 /* DoorOpenerWatchApp.swift */; };
@@ -34,14 +33,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		CEB0E65D2B99202400C3B991 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = CE0020702B947B0A00F3E3D3 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = CECF22622B985BFC00F7A0C9;
-			remoteInfo = "DoorOpenerWatch Watch App";
-		};
-		CECF226E2B985BFE00F7A0C9 /* PBXContainerItemProxy */ = {
+		CE9B2D862B993B1900A7C745 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = CE0020702B947B0A00F3E3D3 /* Project object */;
 			proxyType = 1;
@@ -57,7 +49,7 @@
 			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
 			dstSubfolderSpec = 16;
 			files = (
-				CEB0E65B2B99202400C3B991 /* DoorOpener.app in Embed Watch Content */,
+				CE9B2D842B993B1800A7C745 /* DoorOpener.app in Embed Watch Content */,
 			);
 			name = "Embed Watch Content";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -69,6 +61,8 @@
 		CE00207F2B947B0C00F3E3D3 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		CE0020892B947C7D00F3E3D3 /* SwiftUIView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftUIView.swift; sourceTree = "<group>"; };
 		CE345EBC2B95AB4100CE0F5C /* Preview Content */ = {isa = PBXFileReference; lastKnownFileType = folder; path = "Preview Content"; sourceTree = "<group>"; };
+		CE9B2D832B993AFC00A7C745 /* DoorOpener.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DoorOpener.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		CE9B2D852B993B1900A7C745 /* DoorOpener.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DoorOpener.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CEB0E6412B98F37D00C3B991 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		CEB0E6432B98F40B00C3B991 /* MainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
 		CEB0E6452B98F43D00C3B991 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
@@ -76,8 +70,6 @@
 		CEB0E64D2B98F7B400C3B991 /* DoorOpenerClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DoorOpenerClass.swift; sourceTree = "<group>"; };
 		CEB0E6552B99027C00C3B991 /* AppleWatchConnect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleWatchConnect.swift; sourceTree = "<group>"; };
 		CEB0E6572B99113A00C3B991 /* iPhoneConnect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iPhoneConnect.swift; sourceTree = "<group>"; };
-		CEB0E6592B991C2000C3B991 /* DoorOpener.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DoorOpener.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		CEB0E65C2B99202400C3B991 /* DoorOpener.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DoorOpener.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CEB0E65F2B992DD000C3B991 /* DoorOpenerWatchClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DoorOpenerWatchClass.swift; sourceTree = "<group>"; };
 		CEC1AB0A2B9850940056CE97 /* Launch Screen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
 		CECF22652B985BFC00F7A0C9 /* DoorOpenerWatchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DoorOpenerWatchApp.swift; sourceTree = "<group>"; };
@@ -112,8 +104,8 @@
 				CE00207A2B947B0A00F3E3D3 /* DoorOpener_iOS */,
 				CECF22642B985BFC00F7A0C9 /* DoorOpenerWatch Watch App */,
 				CEB0E6522B99024800C3B991 /* Frameworks */,
-				CEB0E6592B991C2000C3B991 /* DoorOpener.app */,
-				CEB0E65C2B99202400C3B991 /* DoorOpener.app */,
+				CE9B2D832B993AFC00A7C745 /* DoorOpener.app */,
+				CE9B2D852B993B1900A7C745 /* DoorOpener.app */,
 			);
 			sourceTree = "<group>";
 		};
@@ -178,15 +170,14 @@
 			buildRules = (
 			);
 			dependencies = (
-				CECF226F2B985BFE00F7A0C9 /* PBXTargetDependency */,
-				CEB0E65E2B99202400C3B991 /* PBXTargetDependency */,
+				CE9B2D872B993B1900A7C745 /* PBXTargetDependency */,
 			);
 			name = DoorOpener;
 			packageProductDependencies = (
 				CEB0E6502B99023C00C3B991 /* SwiftSoup */,
 			);
 			productName = DoorOpener;
-			productReference = CEB0E65C2B99202400C3B991 /* DoorOpener.app */;
+			productReference = CE9B2D852B993B1900A7C745 /* DoorOpener.app */;
 			productType = "com.apple.product-type.application";
 		};
 		CECF22622B985BFC00F7A0C9 /* DoorOpenerWatch Watch App */ = {
@@ -206,7 +197,7 @@
 				CEB0E6532B99024800C3B991 /* SwiftSoup */,
 			);
 			productName = "DoorOpenerWatch Watch App";
-			productReference = CEB0E6592B991C2000C3B991 /* DoorOpener.app */;
+			productReference = CE9B2D832B993AFC00A7C745 /* DoorOpener.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -255,7 +246,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				CEB0E65A2B991D6900C3B991 /* DoorOpener.app in Resources */,
 				CEC1AB0B2B9850940056CE97 /* Launch Screen.storyboard in Resources */,
 				CE345EBD2B95AB4100CE0F5C /* Preview Content in Resources */,
 				CE08AFC12B987F1F00931E7E /* Assets.xcassets in Resources */,
@@ -306,15 +296,10 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		CEB0E65E2B99202400C3B991 /* PBXTargetDependency */ = {
+		CE9B2D872B993B1900A7C745 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = CECF22622B985BFC00F7A0C9 /* DoorOpenerWatch Watch App */;
-			targetProxy = CEB0E65D2B99202400C3B991 /* PBXContainerItemProxy */;
-		};
-		CECF226F2B985BFE00F7A0C9 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = CECF22622B985BFC00F7A0C9 /* DoorOpenerWatch Watch App */;
-			targetProxy = CECF226E2B985BFE00F7A0C9 /* PBXContainerItemProxy */;
+			targetProxy = CE9B2D862B993B1900A7C745 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -445,7 +430,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_ASSET_PATHS = "\"DoorOpener_iOS/Preview Content\"";
 				DEVELOPMENT_TEAM = 62494T7ZTJ;
 				ENABLE_PREVIEWS = YES;
@@ -485,7 +470,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_ASSET_PATHS = "\"DoorOpener_iOS/Preview Content\"";
 				DEVELOPMENT_TEAM = 62494T7ZTJ;
 				ENABLE_PREVIEWS = YES;
@@ -525,7 +510,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_ASSET_PATHS = "\"DoorOpenerWatch Watch App/Preview Content\"";
 				DEVELOPMENT_TEAM = 62494T7ZTJ;
 				ENABLE_PREVIEWS = YES;
@@ -556,7 +541,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_ASSET_PATHS = "\"DoorOpenerWatch Watch App/Preview Content\"";
 				DEVELOPMENT_TEAM = 62494T7ZTJ;
 				ENABLE_PREVIEWS = YES;

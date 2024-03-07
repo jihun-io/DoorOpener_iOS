@@ -123,3 +123,28 @@ struct Login: View {
 }
 
 
+func logout() {
+    @AppStorage("user_email") var userEmail: String = ""
+    @AppStorage("user_name") var userName: String = ""
+    @AppStorage("logged_in") var loggedIn: Bool = false
+    
+    // 로그아웃 요청을 보냅니다.
+    let url = URL(string: "https://dooropener.jihun.io/logout")!
+    var request = URLRequest(url: url)
+    request.httpMethod = "GET"
+    let session = URLSession(configuration: .default)
+    let task = session.dataTask(with: request) { (data, response, error) in
+        if let error = error {
+            print("Error: \(error)")
+        } else {
+            DispatchQueue.main.async {
+                loggedIn = false
+                UserDefaults.standard.set(false, forKey: "loginSuccessful")  // 로그인 상태를 저장합니다.
+                userEmail = ""
+                userName = ""
+                print("로그아웃 완료!!!")
+            }
+        }
+    }
+    task.resume()
+}

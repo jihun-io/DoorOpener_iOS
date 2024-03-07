@@ -30,6 +30,9 @@ struct ParentView: View {
 
 struct ContentView: View {
     @AppStorage("user_name") var userName: String = ""
+    @AppStorage("logged_in") var loggedIn: Bool = false
+    
+    @State private var isPresentingLogoutView = false
     
     var global = Global()
     
@@ -51,7 +54,31 @@ struct ContentView: View {
                 .buttonStyle(BorderedButtonStyle(tint: .yellow))
             }
             .navigationBarTitle("DoorOpener")
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        isPresentingLogoutView.toggle()
+                    } label: {
+                        Image(systemName:"ellipsis")
+                    }
+                    .fullScreenCover(isPresented: $isPresentingLogoutView) {
+                        LogoutView(isShow: $isPresentingLogoutView)
+                    }
+                }
+            }
         }
+    }
+}
+
+struct LogoutView: View {
+    @Binding var isShow: Bool
+    var body: some View {
+        Button {
+            logout()
+        } label: {
+            Text("로그아웃")
+        }
+        .buttonStyle(BorderedButtonStyle(tint: .red))
     }
 }
 
