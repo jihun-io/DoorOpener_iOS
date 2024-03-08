@@ -135,6 +135,32 @@ func sendDeviceTokenToServer(email: String, token: String) {
     task.resume()
 }
 
+func removeDeviceTokenToServer(token: String) {
+    @AppStorage("openerURL") var openerURL: String = ""
+
+    // Create the URL and request
+    let url = URL(string: "\(openerURL)/apnstokenremove")!
+    var request = URLRequest(url: url)
+    request.httpMethod = "POST"
+    
+    // Set the request body
+    let body = "token=\(token)"
+    request.httpBody = body.data(using: .utf8)
+    
+    // Create the task
+    let task = URLSession.shared.dataTask(with: request) { (data, response, error) in
+        if let error = error {
+            print("Error: \(error)")
+        } else if let data = data {
+            let str = String(data: data, encoding: .utf8)
+            print("Received data:\n\(str ?? "")")
+        }
+    }
+    
+    // Start the task
+    task.resume()
+}
+
 
 class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
@@ -151,6 +177,8 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
             // TODO: Send this token to your server...
             var email = UserData().email
             sendDeviceTokenToServer(email: email, token: token)
+        } else {
+            removeDeviceTokenToServer(token: token)
         }
     }
 
