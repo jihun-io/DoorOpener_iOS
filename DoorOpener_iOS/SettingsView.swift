@@ -133,13 +133,20 @@ struct Settings: View {
                                 let task = session.dataTask(with: request) { (data, response, error) in
                                     if let error = error {
                                         print("Error: \(error)")
+
+                                        // 로그인 정보 초기화
+                                        self.loginSuccessful = false
+                                        UserDefaults.standard.set(false, forKey: "loginSuccessful")
+                                        userData.email = ""
+                                        userData.username = ""
                                     } else {
                                         DispatchQueue.main.async {
+                                            // 로그인 정보 초기화
                                             self.loginSuccessful = false
-                                            UserDefaults.standard.set(false, forKey: "loginSuccessful")  // 로그인 상태를 저장합니다.
+                                            UserDefaults.standard.set(false, forKey: "loginSuccessful")
                                             userData.email = ""
                                             userData.username = ""
-                                            print("로그아웃 완료!!!")
+                                            print("로그아웃 완료")
                                         }
                                     }
                                 }
@@ -349,6 +356,7 @@ struct ModifyEmail: View {
         List {
             HStack {
                 TextField("", text: $text)
+                    .keyboardType(/*@START_MENU_TOKEN@*/.emailAddress/*@END_MENU_TOKEN@*/)
                 if !text.isEmpty {
                     Button(action: {
                         self.text = ""
