@@ -17,12 +17,14 @@ class Global: ObservableObject {
     
     @AppStorage("isTest") var isTest: Bool = false
     
+    @AppStorage("openerURL") var openerURL: String = ""
+    
     func openDoor() {
         var openerLink: String
         if isTest {
-            openerLink = "https://dooropener.jihun.io/openwithapptest"
+            openerLink = "\(openerURL)/openwithapptest"
         } else {
-            openerLink = "https://dooropener.jihun.io/openwithapp"
+            openerLink = "\(openerURL)/openwithapp"
         }
 
         self.doorStatus = "문을 여는 중입니다..."

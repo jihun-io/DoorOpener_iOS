@@ -40,10 +40,20 @@ class LoginStatus: ObservableObject {
 }
 
 func gotoToken(from url: String, completion: @escaping (String?) -> Void) {
+    @AppStorage("openerURL") var openerURL: String = ""
+    
     guard let url = URL(string: url) else {
         print("Invalid URL")
         completion(nil)
         return
+    }
+    
+    // URL의 기본 부분을 저장합니다.
+    if let urlComponents = URLComponents(url: url, resolvingAgainstBaseURL: false),
+       let scheme = urlComponents.scheme,
+       let host = urlComponents.host {
+        let baseURL = "\(scheme)://\(host)"
+        openerURL = baseURL
     }
 
     let task = URLSession.shared.dataTask(with: url) { (data, response, error) in
