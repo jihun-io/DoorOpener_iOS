@@ -8,6 +8,49 @@
 import SwiftUI
 import Foundation
 
+import SwiftSoup
+
+struct Log: Identifiable {
+    let id = UUID()
+    let name: String
+    let date: String
+    let path: String
+}
+
+func fetchLogs() async -> [Log] {
+    guard let url = URL(string: "https://dooropener.jihun.io/settings/logs") else { return [] }
+    let dataResponse = try? await URLSession.shared.data(from: url)
+    var logs: [Log] = []
+    if let data = dataResponse?.0 {
+        let html = String(data: data, encoding: .utf8)
+        do {
+            let doc: Document = try SwiftSoup.parse(html ?? "")
+            let elements: Elements = try doc.select("tbody tr")
+            for element in elements.array() {
+                let tds = try element.select("td").array()
+                if tds.count >= 3 {
+                    let name = try tds[0].text()
+                    let date = try tds[1].text()
+                    let path = try tds[2].text()
+                    logs.append(Log(name: name, date: date, path: path))
+                }
+                if logs.count >= 100 {
+                    break
+                }
+            }
+        } catch Exception.Error(let type, let message) {
+            print(type, message)
+        } catch {
+            print("error")
+        }
+    }
+    return logs
+}
+
+
+
+
+
 struct Settings: View {
     @State private var showingLogoutAlert = false
     @EnvironmentObject var userData: UserData
@@ -59,11 +102,11 @@ struct Settings: View {
                     //                            Text("시스템 정보")
                     //                        }
                     //                    }
-//                    Section {
-//                        NavigationLink(destination: TokenTest()) {
-//                            Text("알림 토큰 확인하기")
-//                        }
-//                    }
+                    Section {
+                        NavigationLink(destination: OpenLogsView()) {
+                            Text("잠금 해제 기록")
+                        }
+                    }
                     
                     Section {
                         Toggle("테스트 모드", isOn: $isTest)
@@ -410,6 +453,92 @@ struct ModifyPassword: View {
     }
 }
 
+struct OpenLogsView: View {
+    @State private var logsComplete = false
+    @State private var logs: [Log] = []
+
+    var body: some View{
+        Group {
+            if !logsComplete {
+                OpenLogsLoading()
+            } else {
+                OpenLogs(logs: $logs)
+            }
+        }
+        .navigationBarTitle("잠금 해제 기록", displayMode: .inline)
+        .onAppear {
+            Task {
+                self.logs = await fetchLogs()
+                self.logsComplete = true
+            }
+        }
+    }
+}
+
+struct OpenLogsLoading: View {
+    var body: some View{
+        VStack {
+            ProgressView()
+                .padding(/*@START_MENU_TOKEN@*/.all/*@END_MENU_TOKEN@*/)
+                .progressViewStyle(LargeProgressViewStyle())
+            Text("불러오는 중...")
+        }
+    }
+}
+
+struct OpenLogs: View {
+    @Binding var logs: [Log]
+    var body: some View {
+        List(logs) { log in
+            VStack {
+                HStack {
+                    Text(log.name)
+                        .font(.title3)
+                        .fontWeight(.bold)
+                    Spacer()
+                }
+                HStack {
+                    Text(log.date)
+                    Spacer()
+                    Text(log.path)
+                }
+            }
+        }
+        .refreshable {
+            await refresh()
+        }
+        
+    }
+    
+    func refresh() async {
+        self.logs = await fetchLogs()
+    }
+}
+
+
+
+
+//struct OpenLogs: View {
+//    @Binding var logs: [Log]
+//    var body: some View {
+//        List(logs) { log in
+//            VStack {
+//                HStack {
+//                    Text(log.name)
+//                        .font(.title3)
+//                        .fontWeight(.bold)
+//                    Spacer()
+//                }
+//                HStack {
+//                    Text(log.date)
+//                    Spacer()
+//                    Text(log.path)
+//                }
+//            }
+//        }
+//    }
+//}
+
 struct TokenTest: View {
     var body: some View {
         Group {
@@ -420,4 +549,21 @@ struct TokenTest: View {
         }
     }
 
+}
+
+struct SettingsViewPreview: PreviewProvider {
+    static var previews: some View {
+        @State var loginSuccessful = false
+        //        Login(loginSuccessful: $loginSuccessful)
+//        ParentView()
+        //        Test()
+        Settings(loginSuccessful: $loginSuccessful)
+//        OpenLogsView()
+            .environmentObject(UserData())
+            .environmentObject(ViewModel())
+            .environmentObject(Global())
+            .environmentObject(Taptic())
+            .environmentObject(Setup())
+            .environmentObject(SyncWithAppleWatch())
+    }
 }
