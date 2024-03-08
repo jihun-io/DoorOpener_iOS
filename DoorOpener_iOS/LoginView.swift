@@ -7,6 +7,56 @@
 import SwiftUI
 import Foundation
 
+struct LoginParent: View {
+    @AppStorage("openerURL") var openerURL = ""
+    @Binding var loginSuccessful: Bool
+    @State private var isLinkActive = false
+    @State private var showAlert = false
+    
+    func isValidURL(_ urlString: String) -> Bool {
+        guard let url = URL(string: urlString),
+              let components = URLComponents(url: url, resolvingAgainstBaseURL: true),
+              components.scheme != nil,
+              components.host != nil,
+              components.path.isEmpty
+        else {
+            return false
+        }
+        return true
+    }
+
+
+    var body: some View {
+        NavigationView {
+            VStack {
+                Text("먼저, 서버의 URL을 입력하십시오.")
+                    .padding(.vertical)
+                TextField("URL", text: $openerURL)
+                    .padding(/*@START_MENU_TOKEN@*/.all/*@END_MENU_TOKEN@*/)
+                    .background(RoundedRectangle(cornerRadius: 10).fill(Color(UIColor.secondarySystemBackground)))
+                Button(action: {
+                    if isValidURL(openerURL) {
+                        isLinkActive = true
+                    } else {
+                        showAlert = true
+                    }
+                }) {
+                    Text("다음")
+                        .padding(.vertical)
+                }
+                .alert(isPresented: $showAlert) {
+                    Alert(title: Text("올바르지 않은 URL"), message: Text("올바른 URL을 입력하십시오."), dismissButton: .default(Text("확인")))
+                }
+                NavigationLink(destination: Login(loginSuccessful: $loginSuccessful), isActive: $isLinkActive) {
+                    EmptyView()
+                }
+            }
+            .padding(/*@START_MENU_TOKEN@*/.all/*@END_MENU_TOKEN@*/)
+        }
+    }
+}
+
+
 struct Login: View {
     @Binding var loginSuccessful: Bool
     @EnvironmentObject var userData: UserData
@@ -14,8 +64,9 @@ struct Login: View {
     @State private var password = ""
     @State private var showingAlert = false  // 알림 표시 여부를 결정하는 새로운 @State 변수
     
+    @AppStorage("openerURL") var openerURL = ""
+    
     var body: some View {
-        
         VStack {
             if loginSuccessful {
                 ParentView()
@@ -39,7 +90,7 @@ struct Login: View {
                     // 로그인 요청을 보냅니다.
                     let loginInfo = "email=\(self.email)&password=\(self.password)"
                     let loginData = loginInfo.data(using: .utf8)
-                    let url = URL(string: "https://dooropener.jihun.io/login")!
+                    let url = URL(string: "\(openerURL)/login")!
                     var request = URLRequest(url: url)
                     request.httpMethod = "POST"
                     request.httpBody = loginData
@@ -59,7 +110,7 @@ struct Login: View {
                             // 서버의 응답에서 로그인 성공 메시지를 찾습니다.
                             if str?.contains("<h1 class=\"status_message\">로그인을<br>완료했습니다.</h1>") == true {
                                 // 사용자 정보 페이지를 요청합니다.
-                                let url = URL(string: "https://dooropener.jihun.io/settings/user")!
+                                let url = URL(string: "\(openerURL)/settings/user")!
                                 let task = session.dataTask(with: url) { (data, response, error) in
                                     if let error = error {
                                         print("Error: \(error)")
@@ -117,8 +168,33 @@ struct Login: View {
                 .alert(isPresented: $showingAlert) {  // 알림을 표시하는 alert 수정자
                     Alert(title: Text("로그인 실패"), message: Text("이메일과 비밀번호를 다시 확인해주세요."), dismissButton: .default(Text("확인")))
                 }
+                
             }
         }
         .padding()
     }
 }
+
+struct LoginViewPreview: PreviewProvider {
+    static var previews: some View {
+        @State var loginSuccessful = false
+        //        Login(loginSuccessful: $loginSuccessful)
+        //        ParentView()
+        //        Test()
+        //        Settings(loginSuccessful: $loginSuccessful)
+        //        OpenLogsView()
+        //        Login(loginSuccessful: $loginSuccessful)
+        LoginParent(loginSuccessful: $loginSuccessful)
+        
+        
+            .environmentObject(UserData())
+            .environmentObject(ViewModel())
+            .environmentObject(Global())
+            .environmentObject(Taptic())
+            .environmentObject(Setup())
+            .environmentObject(SyncWithAppleWatch())
+    }
+}
+
+
+//Login(loginSuccessful: $loginSuccessful)
