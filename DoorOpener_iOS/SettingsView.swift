@@ -499,6 +499,7 @@ struct OpenLogs: View {
                 }
                 HStack {
                     Text(log.date)
+                    .monospacedDigit()
                     Spacer()
                     Text(log.path)
                 }
