@@ -18,7 +18,9 @@ struct Log: Identifiable {
 }
 
 func fetchLogs() async -> [Log] {
-    guard let url = URL(string: "https://dooropener.jihun.io/settings/logs") else { return [] }
+    @AppStorage("openerURL") var openerURL: String = ""
+
+    guard let url = URL(string: "\(openerURL)/settings/logs") else { return [] }
     let dataResponse = try? await URLSession.shared.data(from: url)
     var logs: [Log] = []
     if let data = dataResponse?.0 {
@@ -59,6 +61,9 @@ struct Settings: View {
     @AppStorage("isTest") var isTest: Bool = false
     
     @Binding var loginSuccessful: Bool
+    
+    @AppStorage("openerURL") var openerURL: String = ""
+
     
     var body: some View {
         NavigationView {
@@ -121,7 +126,7 @@ struct Settings: View {
                         .alert(isPresented: $showingLogoutAlert) {
                             Alert(title: Text("로그아웃"), message: Text("정말로 로그아웃 하시겠습니까?"), primaryButton: .destructive(Text("로그아웃")) {
                                 // 로그아웃 요청을 보냅니다.
-                                let url = URL(string: "https://dooropener.jihun.io/logout")!
+                                let url = URL(string: "\(openerURL)/logout")!
                                 var request = URLRequest(url: url)
                                 request.httpMethod = "GET"
                                 let session = URLSession(configuration: .default)
@@ -223,7 +228,9 @@ struct EditUser: View {
         })
     }
     func sendPostRequest() {
-        guard let url = URL(string: "https://dooropener.jihun.io/settings/user/modify/request") else {
+        @AppStorage("openerURL") var openerURL: String = ""
+
+        guard let url = URL(string: "\(openerURL)/settings/user/modify/request") else {
             print("Invalid URL")
             return
         }
@@ -247,7 +254,9 @@ struct EditUser: View {
     
     
     func updateUserInfo() {
-        guard let url = URL(string: "https://dooropener.jihun.io/settings/user") else {
+        @AppStorage("openerURL") var openerURL: String = ""
+
+        guard let url = URL(string: "\(openerURL)/settings/user") else {
             print("Invalid URL")
             return
         }
@@ -421,11 +430,13 @@ struct ModifyPassword: View {
         }
     }
     func sendPostRequest() {
+        @AppStorage("openerURL") var openerURL: String = ""
+
         if password.isEmpty {
             self.alertType = .emptyPassword
         } else {
             if password == password2 {
-                guard let url = URL(string: "https://dooropener.jihun.io/settings/user/password/request") else {
+                guard let url = URL(string: "\(openerURL)/settings/user/password/request") else {
                     print("Invalid URL")
                     return
                 }

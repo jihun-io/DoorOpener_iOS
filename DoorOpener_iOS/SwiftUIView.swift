@@ -34,7 +34,7 @@ struct ParentView: View {
                         Open().environmentObject(userData)
                     }
             } else {
-                Login(loginSuccessful: $loginSuccessful)
+                LoginParent(loginSuccessful: $loginSuccessful)
             }
         }
         .onAppear {
@@ -94,6 +94,9 @@ struct AWLoading: View {
     @StateObject var applewatchconnect = WatchConnectManager()
     @State var isGet = false
     @State var token = ""
+    
+    @AppStorage("openerURL") var openerURL: String = ""
+
 
     var body: some View {
         VStack {
@@ -102,7 +105,7 @@ struct AWLoading: View {
                 .progressViewStyle(LargeProgressViewStyle())
             Text("Apple Watch와 계정을 연동 중입니다...")
                 .onAppear {
-                    loadToken(from: "https://dooropener.jihun.io/applewatch/generate") { pText in
+                    loadToken(from: "\(openerURL)/applewatch/generate") { pText in
                         if let pText = pText {
                             isGet = true
                             token = pText

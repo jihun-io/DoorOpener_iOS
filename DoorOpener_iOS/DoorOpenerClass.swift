@@ -32,13 +32,14 @@ class Global: ObservableObject {
     @Published var doorStatus: String = ""
     
     @AppStorage("isTest") var isTest: Bool = false
+    @AppStorage("openerURL") var openerURL: String = ""
     
     func openDoor() {
         var openerLink: String
         if isTest {
-            openerLink = "https://dooropener.jihun.io/openwithapptest"
+            openerLink = "\(openerURL)/openwithapptest"
         } else {
-            openerLink = "https://dooropener.jihun.io/openwithapp"
+            openerLink = "\(openerURL)/openwithapp"
         }
         
         
@@ -75,7 +76,7 @@ class Global: ObservableObject {
     }
     
     func userInfoLoad() {
-        guard let url = URL(string: "https://dooropener.jihun.io/settings/user") else {
+        guard let url = URL(string: "\(openerURL)/settings/user") else {
             print("Invalid URL")
             return
         }
@@ -109,8 +110,10 @@ class UserData: ObservableObject {
 }
 
 func sendDeviceTokenToServer(email: String, token: String) {
+    @AppStorage("openerURL") var openerURL: String = ""
+
     // Create the URL and request
-    let url = URL(string: "https://dooropener.jihun.io/apnstokenget")!
+    let url = URL(string: "\(openerURL)/apnstokenget")!
     var request = URLRequest(url: url)
     request.httpMethod = "POST"
     
