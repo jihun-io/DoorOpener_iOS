@@ -68,7 +68,7 @@ struct Settings: View {
                         NavigationLink(destination: EditUser(userName: $userData.username, userEmail: $userData.email).environmentObject(userData)) {
                             VStack(alignment: .leading) {
                                 Text(userData.username)
-                                    .font(.headline)
+                                    .font(.title2)
                                     .fontWeight(.bold)
                                     .multilineTextAlignment(.leading)
                                 
