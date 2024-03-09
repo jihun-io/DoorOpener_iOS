@@ -98,9 +98,9 @@ struct Open: View {
     
     var body: some View {
         VStack {
-            if global.doorStatus == "문을 여는 중입니다..." {
+            if global.doorStatus == "Pending" {
                 OpeningDoorView()
-            } else if global.doorStatus == "문을 열었습니다." {
+            } else if global.doorStatus == "Success" {
                 DoorOpenedView().environmentObject(userData)
             } else {
                 Text(global.doorStatus)

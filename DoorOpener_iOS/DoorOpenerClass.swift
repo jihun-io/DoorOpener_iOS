@@ -28,22 +28,26 @@ class Taptic: ObservableObject {
     @Published var isTap = false
 }
 
+struct OpenResult: Codable {
+    let result: String
+}
+
 class Global: ObservableObject {
     @Published var doorStatus: String = ""
     
     @AppStorage("isTest") var isTest: Bool = false
+    @AppStorage("isAdmin") var isAdmin: Bool = false
     @AppStorage("openerURL") var openerURL: String = ""
     
     func openDoor() {
         var openerLink: String
         if isTest {
-            openerLink = "\(openerURL)/openwithapptest"
+            openerLink = "\(openerURL)/openwithapptestjson"
         } else {
-            openerLink = "\(openerURL)/openwithapp"
+            openerLink = "\(openerURL)/openwithappjson"
         }
-        
-        
-        self.doorStatus = "문을 여는 중입니다..."
+
+        self.doorStatus = "Pending"
         DispatchQueue.main.async {
             guard let url = URL(string: openerLink) else {
                 print("Invalid URL")
@@ -52,23 +56,23 @@ class Global: ObservableObject {
             URLSession.shared.dataTask(with: url) { (data, response, error) in
                 if let error = error {
                     print("Error: \(error)")
-                } else if let data = data,
-                          let str = String(data: data, encoding: .utf8),
-                          let doorOpenRegex = try? NSRegularExpression(pattern: "<p>(문을 열었습니다.)</p>", options: []),
-                          let doorOpenMatch = doorOpenRegex.firstMatch(in: str, options: [], range: NSRange(location: 0, length: str.utf16.count)),
-                          let doorOpenRange = Range(doorOpenMatch.range(at: 1), in: str) {
-                    let doorOpenMessage = String(str[doorOpenRange])
-                    
-                    let now = Date()
-                    let formatter = DateFormatter()
-                    formatter.timeZone = TimeZone(identifier: "Asia/Seoul")
-                    formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
-                    let kstTime = formatter.string(from: now)
-                    
-                    
-                    DispatchQueue.main.async {
-                        self.doorStatus = doorOpenMessage
-                        print("\(kstTime) 문 상태 업데이트 완료: \(self.doorStatus)")
+                } else if let data = data {
+                    do {
+                        let openResult = try JSONDecoder().decode(OpenResult.self, from: data)
+                        let doorOpenMessage = openResult.result
+                        
+                        let now = Date()
+                        let formatter = DateFormatter()
+                        formatter.timeZone = TimeZone(identifier: "Asia/Seoul")
+                        formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+                        let kstTime = formatter.string(from: now)
+                        
+                        DispatchQueue.main.async {
+                            self.doorStatus = doorOpenMessage
+                            print("\(kstTime) 문 상태 업데이트 완료: \(self.doorStatus)")
+                        }
+                    } catch {
+                        print("error")
                     }
                 }
             }.resume()
@@ -76,32 +80,33 @@ class Global: ObservableObject {
     }
     
     func userInfoLoad() {
-        guard let url = URL(string: "\(openerURL)/settings/user") else {
+        guard let url = URL(string: "\(openerURL)/settings/user/info") else {
             print("Invalid URL")
             return
         }
         URLSession.shared.dataTask(with: url) { (data, response, error) in
             if let error = error {
                 print("Error: \(error)")
-            } else if let data = data,
-                      let str = String(data: data, encoding: .utf8),
-                      let nameRegex = try? NSRegularExpression(pattern: "<h1 id=\"name\">(.*)</h1>", options: []),
-                      let emailRegex = try? NSRegularExpression(pattern: "<h2 id=\"email\">(.*)</h2>", options: []),
-                      let nameMatch = nameRegex.firstMatch(in: str, options: [], range: NSRange(location: 0, length: str.utf16.count)),
-                      let emailMatch = emailRegex.firstMatch(in: str, options: [], range: NSRange(location: 0, length: str.utf16.count)),
-                      let nameRange = Range(nameMatch.range(at: 1), in: str),
-                      let emailRange = Range(emailMatch.range(at: 1), in: str) {
-                let name = String(str[nameRange])
-                let email = String(str[emailRange])
-                
-                DispatchQueue.main.async {
-                    UserDefaults.standard.set(name, forKey: "user_name")
-                    UserDefaults.standard.set(email, forKey: "user_email")
-                    print("사용자 정보 업데이트 완료: \(UserDefaults.standard.string(forKey: "user_name") ?? ""), \(UserDefaults.standard.string(forKey: "user_email") ?? "")")
+            } else if let data = data {
+                do {
+                    let loginResponse = try JSONDecoder().decode(LoginResponse.self, from: data)
+                    DispatchQueue.main.async {
+                        UserDefaults.standard.set(loginResponse.username, forKey: "user_name")
+                        UserDefaults.standard.set(loginResponse.email, forKey: "user_email")
+                        if loginResponse.isAdmin == 1 {
+                            self.isAdmin = true
+                        } else {
+                            self.isAdmin = false
+                        }
+                        print("사용자 정보 업데이트 완료: \(UserDefaults.standard.string(forKey: "user_name") ?? ""), \(UserDefaults.standard.string(forKey: "user_email") ?? "")")
+                    }
+                } catch {
+                    print("Error: \(error)")
                 }
             }
         }.resume()
     }
+
 }
 
 class UserData: ObservableObject {

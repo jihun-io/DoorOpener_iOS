@@ -7,61 +7,57 @@
 import SwiftUI
 import Foundation
 
+struct LoginData: Codable {
+    let email: String
+    let password: String
+}
+
+struct LoginResponse: Codable {
+    let result: String
+    let username: String
+    let email: String
+    let isAdmin: Int?
+}
+
 func LoginProcess(email: String, password: String, userData: UserData) async -> String {
     @AppStorage("openerURL") var openerURL = ""
     var resultofLogin = "Not Logged in yet"
 
     // 로그인 요청을 보냅니다.
-    let loginInfo = "email=\(email)&password=\(password)"
-    let loginData = loginInfo.data(using: .utf8)
-    let url = URL(string: "\(openerURL)/login")!
+    let loginData = LoginData(email: email, password: password)
+    guard let jsonData = try? JSONEncoder().encode(loginData) else { return resultofLogin }
+    
+    let url = URL(string: "\(openerURL)/loginwithapp")!
     var request = URLRequest(url: url)
     request.httpMethod = "POST"
-    request.httpBody = loginData
-    request.addValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
+    request.httpBody = jsonData
+    request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+    
     let config = URLSessionConfiguration.default
     config.httpCookieStorage = HTTPCookieStorage.shared
     let session = URLSession(configuration: config)
 
     do {
         let (data, response) = try await session.data(for: request)
-        let str = String(data: data, encoding: .utf8)
 
         // 서버의 응답에서 로그인 성공 메시지를 찾습니다.
-        if str?.contains("<h1 class=\"status_message\">로그인을<br>완료했습니다.</h1>") == true {
-            // 사용자 정보 페이지를 요청합니다.
-            let url = URL(string: "\(openerURL)/settings/user")!
-            let (data, response) = try await URLSession.shared.data(from: url)
-            let str = String(data: data, encoding: .utf8)
-
-            // 응답에서 사용자 이름과 이메일을 파싱합니다.
-            if let nameRegex = try? NSRegularExpression(pattern: "<h1 id=\"name\">(.*)</h1>", options: []),
-               let emailRegex = try? NSRegularExpression(pattern: "<h2 id=\"email\">(.*)</h2>", options: []),
-               let str = str {
-                if let nameMatch = nameRegex.firstMatch(in: str, options: [], range: NSRange(location: 0, length: str.utf16.count)),
-                   let emailMatch = emailRegex.firstMatch(in: str, options: [], range: NSRange(location: 0, length: str.utf16.count)),
-                   let nameRange = Range(nameMatch.range(at: 1), in: str),
-                   let emailRange = Range(emailMatch.range(at: 1), in: str) {
-                    let name = String(str[nameRange])
-                    let email = String(str[emailRange])
-
-                    // 사용자 이름과 이메일을 저장합니다.
-                    UserDefaults.standard.set(name, forKey: "user_name")
-                    UserDefaults.standard.set(email, forKey: "user_email")
-                    userData.username = name
-                    userData.email = email
-                    print("userID 저장 완료")
-                    print("\(userData.username), \(userData.email)")
-                    print("로그인성공!!!!!!!!!!")
-                    UserDefaults.standard.set(true, forKey: "loginSuccessful")
-                    if UserDefaults.standard.bool(forKey: "loginSuccessful") {
-                        print("로그인값이 트루다!")
-                        await UIApplication.shared.registerForRemoteNotifications()
-                        resultofLogin = "Success"
-                    } else {
-                        resultofLogin = "Failed"
-                    }
-                }
+        let loginResponse = try JSONDecoder().decode(LoginResponse.self, from: data)
+        if loginResponse.result == "Success" {
+            // 사용자 이름과 이메일을 저장합니다.
+            UserDefaults.standard.set(loginResponse.username, forKey: "user_name")
+            UserDefaults.standard.set(loginResponse.email, forKey: "user_email")
+            userData.username = loginResponse.username
+            userData.email = loginResponse.email
+            print("userID 저장 완료")
+            print("\(userData.username), \(userData.email)")
+            print("로그인성공!!!!!!!!!!")
+            UserDefaults.standard.set(true, forKey: "loginSuccessful")
+            if UserDefaults.standard.bool(forKey: "loginSuccessful") {
+                print("로그인값이 트루다!")
+                await UIApplication.shared.registerForRemoteNotifications()
+                resultofLogin = "Success"
+            } else {
+                resultofLogin = "Failed"
             }
         }
     } catch {
@@ -70,6 +66,7 @@ func LoginProcess(email: String, password: String, userData: UserData) async -> 
 
     return resultofLogin
 }
+
 
 
 struct LoginParent: View {
@@ -97,6 +94,10 @@ struct LoginParent: View {
     var body: some View {
         NavigationView {
             VStack {
+                Text("DoorOpener")
+                    .font(.largeTitle)
+                    .fontWeight(.heavy)
+                    .padding(/*@START_MENU_TOKEN@*/.all, 30.0/*@END_MENU_TOKEN@*/)
                 Text("먼저, 서버의 URL을 입력하십시오.")
                     .padding(.vertical)
                 TextField("URL", text: $openerURL)
@@ -239,7 +240,7 @@ struct LoginViewPreview: PreviewProvider {
         //        Settings(loginSuccessful: $loginSuccessful)
         //        OpenLogsView()
         //        Login(loginSuccessful: $loginSuccessful)
-        Login(loginSuccessful: $loginSuccessful)
+        LoginParent(loginSuccessful: $loginSuccessful)
         
         
             .environmentObject(UserData())

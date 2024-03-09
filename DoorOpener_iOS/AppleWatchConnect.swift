@@ -44,34 +44,31 @@ class WatchConnectManager: NSObject, ObservableObject, WCSessionDelegate {
     }
 }
 
+struct AppleWatchConnectionResponse: Codable {
+    let link: String
+}
+
 func loadToken(from url: String, completion: @escaping (String?) -> Void) {
     guard let url = URL(string: url) else {
         print("Invalid URL")
         completion(nil)
         return
     }
-
     let task = URLSession.shared.dataTask(with: url) { (data, response, error) in
         if let error = error {
             print("Error: \(error)")
             completion(nil)
         } else if let data = data {
-            let html = String(data: data, encoding: .utf8)
             do {
-                let doc: Document = try SwiftSoup.parse(html ?? "")
-                let pElements: Elements = try doc.select("p")
-                let pText = try pElements.text()
-                completion(pText)
-            } catch Exception.Error(let type, let message) {
-                print("Message: \(message)")
-                completion(nil)
+                let appleWatchConnectionResponse = try JSONDecoder().decode(AppleWatchConnectionResponse.self, from: data)
+                print(appleWatchConnectionResponse.link)
+                completion(appleWatchConnectionResponse.link)
             } catch {
                 print("error")
                 completion(nil)
             }
         }
     }
-
     task.resume()
 }
 
