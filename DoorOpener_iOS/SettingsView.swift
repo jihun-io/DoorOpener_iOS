@@ -7,6 +7,7 @@
 
 import SwiftUI
 import Foundation
+import SafariServices
 
 import SwiftSoup
 
@@ -49,20 +50,26 @@ func fetchLogs() async -> [Log] {
     return logs
 }
 
-
-
+func sendPush() async -> String {
+    @AppStorage("openerURL") var openerURL: String = ""
+    
+    guard let url = URL(string: "\(openerURL)/pushtest") else { return "Error" }
+    let dataResponse = try? await URLSession.shared.data(from: url)
+    return "Completed"
+}
 
 
 struct Settings: View {
     @State private var showingLogoutAlert = false
     @EnvironmentObject var userData: UserData
     @EnvironmentObject var setup: Setup
-    
-    @AppStorage("isTest") var isTest: Bool = false
-    
+
     @Binding var loginSuccessful: Bool
     
     @AppStorage("openerURL") var openerURL: String = ""
+    
+    @State var showShortcuts = false
+    @State var urlString = "https://www.icloud.com/shortcuts/de4a01d269764d7ca2f1f8f4ca29df7b"
 
     
     var body: some View {
@@ -81,15 +88,33 @@ struct Settings: View {
                             }
                         }
                     }
+                    Section {
+                        NavigationLink(destination: OpenLogsView()) {
+                            Text("잠금 해제 기록")
+                        }
+                    }
                     if ProcessInfo.processInfo.isMacCatalystApp {
 
                     } else {
                         Section {
+                            Button(action: {
+                                self.showShortcuts = true
+                            }) {
+                                Text("단축어 앱에 추가")
+                            }
+                            
                             NavigationLink(destination: LoginWithAppleWatch()) {
                                 Text("Apple Watch에 로그인")
                             }
                         }
                     }
+                    Section {
+                        NavigationLink(destination: Dev()) {
+                            Text("개발자 설정")
+                        }
+                    }
+                    
+                    
                     //                        NavigationLink(destination: Text("Hello, world!")) {
                     //                            Text("임시 키 발급")
                     //                        }
@@ -107,15 +132,7 @@ struct Settings: View {
                     //                            Text("시스템 정보")
                     //                        }
                     //                    }
-                    Section {
-                        NavigationLink(destination: OpenLogsView()) {
-                            Text("잠금 해제 기록")
-                        }
-                    }
-                    
-                    Section {
-                        Toggle("테스트 모드", isOn: $isTest)
-                    }
+
                     Section {
                         Button(action: {
                             self.showingLogoutAlert = true
@@ -157,6 +174,9 @@ struct Settings: View {
                 }
             }
             .navigationBarTitle("설정")
+        }
+        .sheet(isPresented: $showShortcuts) {
+            Shortcuts(url:URL(string: self.urlString)!)
         }
     }
 }
@@ -508,56 +528,38 @@ struct OpenLogsLoading: View {
 struct OpenLogs: View {
     @Binding var logs: [Log]
     var body: some View {
-        List(logs) { log in
-            VStack {
-                HStack {
-                    Text(log.name)
-                        .font(.title3)
-                        .fontWeight(.bold)
-                    Spacer()
-                }
-                HStack {
-                    Text(log.date)
-                    .monospacedDigit()
-                    Spacer()
-                    Text(log.path)
+        Group {
+//            Text("최근 100개의 기록까지만 열람할 수 있습니다.")
+            List {
+                Section(header: Text("최근 100개의 기록까지만 열람할 수 있습니다.")){
+                    ForEach(logs) { log in
+                        VStack {
+                            HStack {
+                                Text(log.name)
+                                    .font(.title3)
+                                    .fontWeight(.bold)
+                                Spacer()
+                            }
+                            HStack {
+                                Text(log.date)
+                                    .monospacedDigit()
+                                Spacer()
+                                Text(log.path)
+                            }
+                        }
+                    }
                 }
             }
         }
         .refreshable {
             await refresh()
         }
-        
     }
     
     func refresh() async {
         self.logs = await fetchLogs()
     }
 }
-
-
-
-
-//struct OpenLogs: View {
-//    @Binding var logs: [Log]
-//    var body: some View {
-//        List(logs) { log in
-//            VStack {
-//                HStack {
-//                    Text(log.name)
-//                        .font(.title3)
-//                        .fontWeight(.bold)
-//                    Spacer()
-//                }
-//                HStack {
-//                    Text(log.date)
-//                    Spacer()
-//                    Text(log.path)
-//                }
-//            }
-//        }
-//    }
-//}
 
 struct TokenTest: View {
     var body: some View {
@@ -567,6 +569,41 @@ struct TokenTest: View {
         .onAppear {
             
         }
+    }
+}
+
+struct Dev: View {
+    @AppStorage("openerURL") var openerURL: String = ""
+    @AppStorage("isTest") var isTest: Bool = false
+    var body: some View {
+        List {
+            Section {
+                Toggle("테스트 모드", isOn: $isTest)
+            }
+            Section {
+                Button(action: {
+                    Task {
+                        await sendPush()
+                    }
+                }) {
+                    Text("푸시 전송")
+                }
+            }
+        }
+        .navigationBarTitle("개발자 설정", displayMode: .inline)
+
+    }
+}
+
+struct Shortcuts: UIViewControllerRepresentable {
+    let url: URL
+
+    func makeUIViewController(context: UIViewControllerRepresentableContext<Shortcuts>) -> SFSafariViewController {
+        return SFSafariViewController(url: url)
+    }
+
+    func updateUIViewController(_ uiViewController: SFSafariViewController, context: UIViewControllerRepresentableContext<Shortcuts>) {
+
     }
 
 }
