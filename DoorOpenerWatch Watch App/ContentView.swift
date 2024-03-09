@@ -32,6 +32,8 @@ struct ContentView: View {
     @AppStorage("user_name") var userName: String = ""
     @AppStorage("logged_in") var loggedIn: Bool = false
     
+    @StateObject var iphoneconnectmanager = IPhoneConnectManager()
+    
     @State private var isPresentingLogoutView = false
     
     var global = Global()
@@ -63,6 +65,18 @@ struct ContentView: View {
                     }
                     .fullScreenCover(isPresented: $isPresentingLogoutView) {
                         LogoutView(isShow: $isPresentingLogoutView)
+                    }
+                }
+            }
+            .onReceive(iphoneconnectmanager.$receivedMessage) { newValue in
+                if newValue != "" {
+                    print("Received: \(newValue)")
+                    gotoToken(from: newValue) { result in
+                        if result != nil {
+                            loggedIn = true
+                            iphoneconnectmanager.sendMessage("Success!")
+                            print("all ready")
+                        }
                     }
                 }
             }

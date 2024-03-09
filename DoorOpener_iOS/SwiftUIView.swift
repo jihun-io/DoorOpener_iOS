@@ -76,22 +76,28 @@ struct ContentView: View {
 
 struct LoginWithAppleWatch: View {
     @EnvironmentObject var syncwithapplewatch: SyncWithAppleWatch
+    @AppStorage("watchLogin") var watchLogin: Bool = false
+    
     var body: some View {
         VStack {
-            if !syncwithapplewatch.complete {
+            if !watchLogin {
                 AWLoading()
             } else {
                 AWComplete()
             }
         }
         .navigationBarTitle("Apple Watch에 로그인", displayMode: .inline)
-
+        .onAppear {
+            syncwithapplewatch.complete = false
+        }
     }
 }
 
 struct AWLoading: View {
     @EnvironmentObject var syncwithapplewatch: SyncWithAppleWatch
     @StateObject var applewatchconnect = WatchConnectManager()
+    @AppStorage("watchLogin") var watchLogin: Bool = false
+
     @State var isGet = false
     @State var token = ""
     
@@ -119,6 +125,7 @@ struct AWLoading: View {
                     if newValue != "" {
                         print("Received: \(newValue)")
                         syncwithapplewatch.complete = true
+                        watchLogin = true
                     }
                 }
         }
@@ -126,7 +133,9 @@ struct AWLoading: View {
 }
 
 struct AWComplete: View {
-
+    @EnvironmentObject var syncwithapplewatch: SyncWithAppleWatch
+    @AppStorage("watchLogin") var watchLogin: Bool = false
+    
     var body: some View {
         VStack {
             Image(systemName: "checkmark.circle.fill")
@@ -135,6 +144,19 @@ struct AWComplete: View {
                 .scaledToFill()
                 .frame(width: 100, height: 100)
             Text("연동이 완료되었습니다.")
+                .padding(/*@START_MENU_TOKEN@*/.all/*@END_MENU_TOKEN@*/)
+            
+            if !syncwithapplewatch.complete {
+                Button(action: {
+                    syncwithapplewatch.complete = false
+                    watchLogin = false
+                    
+                }, label: {
+                    Text("다시 로그인하기")
+                        .padding(/*@START_MENU_TOKEN@*/.all/*@END_MENU_TOKEN@*/)
+                })
+            }
+            
         }
     }
 }
