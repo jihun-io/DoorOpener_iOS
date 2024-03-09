@@ -12,6 +12,10 @@ class Taptic: ObservableObject {
     @Published var isTap = false
 }
 
+struct OpenResult: Codable {
+    let result: String
+}
+
 class Global: ObservableObject {
     @Published var doorStatus: String = ""
     
@@ -22,12 +26,12 @@ class Global: ObservableObject {
     func openDoor() {
         var openerLink: String
         if isTest {
-            openerLink = "\(openerURL)/openwithapptest"
+            openerLink = "\(openerURL)/openwithapptestjson"
         } else {
-            openerLink = "\(openerURL)/openwithapp"
+            openerLink = "\(openerURL)/openwithappjson"
         }
 
-        self.doorStatus = "문을 여는 중입니다..."
+        self.doorStatus = "Pending"
         DispatchQueue.main.async {
             guard let url = URL(string: openerLink) else {
                 print("Invalid URL")
@@ -36,23 +40,23 @@ class Global: ObservableObject {
             URLSession.shared.dataTask(with: url) { (data, response, error) in
                 if let error = error {
                     print("Error: \(error)")
-                } else if let data = data,
-                          let str = String(data: data, encoding: .utf8),
-                          let doorOpenRegex = try? NSRegularExpression(pattern: "<p>(문을 열었습니다.)</p>", options: []),
-                          let doorOpenMatch = doorOpenRegex.firstMatch(in: str, options: [], range: NSRange(location: 0, length: str.utf16.count)),
-                          let doorOpenRange = Range(doorOpenMatch.range(at: 1), in: str) {
-                    let doorOpenMessage = String(str[doorOpenRange])
-                    
-                    let now = Date()
-                    let formatter = DateFormatter()
-                    formatter.timeZone = TimeZone(identifier: "Asia/Seoul")
-                    formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
-                    let kstTime = formatter.string(from: now)
-                    
-                    
-                    DispatchQueue.main.async {
-                        self.doorStatus = doorOpenMessage
-                        print("\(kstTime) 문 상태 업데이트 완료: \(self.doorStatus)")
+                } else if let data = data {
+                    do {
+                        let openResult = try JSONDecoder().decode(OpenResult.self, from: data)
+                        let doorOpenMessage = openResult.result
+                        
+                        let now = Date()
+                        let formatter = DateFormatter()
+                        formatter.timeZone = TimeZone(identifier: "Asia/Seoul")
+                        formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+                        let kstTime = formatter.string(from: now)
+                        
+                        DispatchQueue.main.async {
+                            self.doorStatus = doorOpenMessage
+                            print("\(kstTime) 문 상태 업데이트 완료: \(self.doorStatus)")
+                        }
+                    } catch {
+                        print("error")
                     }
                 }
             }.resume()

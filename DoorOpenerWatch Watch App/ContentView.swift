@@ -40,7 +40,7 @@ struct ContentView: View {
         NavigationStack {
             VStack {
                 Spacer()
-                Text("\(userName)님, \n안녕하세요?")
+                Text("\(userName) 님, \n안녕하세요?")
                     .font(.title3)
                     .multilineTextAlignment(.leading)
                     .padding(/*@START_MENU_TOKEN@*/.all/*@END_MENU_TOKEN@*/)
@@ -132,9 +132,9 @@ struct Open: View {
     
     var body: some View {
         VStack {
-            if global.doorStatus == "문을 여는 중입니다..." {
+            if global.doorStatus == "Pending" {
                 OpeningDoorView().environmentObject(taptic)
-            } else if global.doorStatus == "문을 열었습니다." {
+            } else if global.doorStatus == "Success" {
                 DoorOpenedView().environmentObject(taptic)
             } else {
                 Text(global.doorStatus)
@@ -150,7 +150,7 @@ struct Open: View {
 
 
 struct SwiftUIView_Previews: PreviewProvider {
-    
+    @AppStorage("user_name") var userName: String = ""
     static var previews: some View {
         ContentView()
 //        OpeningDoorView()

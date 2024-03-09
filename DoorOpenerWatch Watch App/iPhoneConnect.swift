@@ -39,8 +39,17 @@ class LoginStatus: ObservableObject {
     @Published var complete: Bool = false
 }
 
+struct LoginResult: Codable {
+    var message: String
+    var email: String
+    var username: String
+}
+
 func gotoToken(from url: String, completion: @escaping (String?) -> Void) {
     @AppStorage("openerURL") var openerURL: String = ""
+    
+    @AppStorage("user_email") var userEmail: String = ""
+    @AppStorage("user_name") var userName: String = ""
     
     guard let url = URL(string: url) else {
         print("Invalid URL")
@@ -61,12 +70,14 @@ func gotoToken(from url: String, completion: @escaping (String?) -> Void) {
             print("Error: \(error)")
             completion(nil)
         } else if let data = data {
-            let html = String(data: data, encoding: .utf8)
             do {
-                let doc: Document = try SwiftSoup.parse(html ?? "")
-                let pElements: Elements = try doc.select("p")
-                let pText = try pElements.text()
-                completion(pText)
+                let loginResult = try JSONDecoder().decode(LoginResult.self, from: data)
+                
+                let result = loginResult.message
+                userEmail = loginResult.email
+                userName = loginResult.username
+                
+                completion(result)
             } catch Exception.Error(let type, let message) {
                 print("Message: \(message)")
                 completion(nil)
@@ -104,30 +115,15 @@ struct Login: View {
             .onReceive(iphoneconnectmanager.$receivedMessage) { newValue in
                 if newValue != "" {
                     print("Received: \(newValue)")
-                    gotoToken(from: newValue) { pText in
-                        if let pText = pText {
-                            saveUserInfo(from: pText)
+                    gotoToken(from: newValue) { result in
+                        if result != nil {
                             loggedIn = true
+                            iphoneconnectmanager.sendMessage("Success!")
                             print("all ready")
                         }
                     }
                 }
             }
-        }
-    }
-    
-    func saveUserInfo(from data: String) {
-        // 괄호와 따옴표를 제거하고, 쉼표를 기준으로 두 데이터를 나눕니다.
-        let trimmedData = data.trimmingCharacters(in: CharacterSet(charactersIn: "(')"))
-        let components = trimmedData.components(separatedBy: "', '")
-        
-        if components.count == 2 {
-            userEmail = components[0]
-            userName = components[1]
-            
-            print("email: \(userEmail), name: \(userName)")
-        } else {
-            print("Unexpected data format")
         }
     }
 }
@@ -146,6 +142,13 @@ func logout() {
     let task = session.dataTask(with: request) { (data, response, error) in
         if let error = error {
             print("Error: \(error)")
+            DispatchQueue.main.async {
+                loggedIn = false
+                UserDefaults.standard.set(false, forKey: "loginSuccessful")  // 로그인 상태를 저장합니다.
+                userEmail = ""
+                userName = ""
+                print("로그아웃 완료!!!")
+            }
         } else {
             DispatchQueue.main.async {
                 loggedIn = false

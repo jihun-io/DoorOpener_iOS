@@ -114,6 +114,13 @@ struct AWLoading: View {
                         }
                     }
                 }
+                .onReceive(applewatchconnect.$receivedMessage) { newValue in
+                    print("Received: \(newValue)")
+                    if newValue != "" {
+                        print("Received: \(newValue)")
+                        syncwithapplewatch.complete = true
+                    }
+                }
         }
     }
 }
@@ -122,7 +129,12 @@ struct AWComplete: View {
 
     var body: some View {
         VStack {
-            Text("연동이 완료되었습니다!")
+            Image(systemName: "checkmark.circle.fill")
+                .resizable()
+                .padding(/*@START_MENU_TOKEN@*/.all/*@END_MENU_TOKEN@*/)
+                .scaledToFill()
+                .frame(width: 100, height: 100)
+            Text("연동이 완료되었습니다.")
         }
     }
 }
@@ -135,6 +147,7 @@ struct SwiftUIView_Previews: PreviewProvider {
         //        Login(loginSuccessful: $loginSuccessful)
         ParentView()
         //        Test()
+//        AWComplete()
             .environmentObject(UserData())
             .environmentObject(ViewModel())
             .environmentObject(Global())
