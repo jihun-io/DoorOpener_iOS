@@ -54,7 +54,6 @@ func sendPush() async -> String {
     @AppStorage("openerURL") var openerURL: String = ""
     
     guard let url = URL(string: "\(openerURL)/pushtest") else { return "Error" }
-    let dataResponse = try? await URLSession.shared.data(from: url)
     return "Completed"
 }
 
@@ -67,6 +66,8 @@ struct Settings: View {
     @Binding var loginSuccessful: Bool
     
     @AppStorage("openerURL") var openerURL: String = ""
+    @AppStorage("isAdmin") var isAdmin: Bool = false
+
     
     @State var showShortcuts = false
     @State var urlString = "https://www.icloud.com/shortcuts/de4a01d269764d7ca2f1f8f4ca29df7b"
@@ -108,9 +109,11 @@ struct Settings: View {
                             }
                         }
                     }
-                    Section {
-                        NavigationLink(destination: Dev()) {
-                            Text("개발자 설정")
+                    if isAdmin {
+                        Section {
+                            NavigationLink(destination: Dev()) {
+                                Text("개발자 설정")
+                            }
                         }
                     }
                     
@@ -575,10 +578,15 @@ struct TokenTest: View {
 struct Dev: View {
     @AppStorage("openerURL") var openerURL: String = ""
     @AppStorage("isTest") var isTest: Bool = false
+    @AppStorage("noNotification") var noNotification: Bool = false
     var body: some View {
         List {
             Section {
                 Toggle("테스트 모드", isOn: $isTest)
+                if isTest {
+                    Toggle("조용히 문 열기", isOn: $noNotification)
+                }
+
             }
             Section {
                 Button(action: {
@@ -586,7 +594,7 @@ struct Dev: View {
                         await sendPush()
                     }
                 }) {
-                    Text("푸시 전송")
+                    Text("모든 관리자 계정에게 알림 전송")
                 }
             }
         }

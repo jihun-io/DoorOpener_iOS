@@ -21,6 +21,12 @@ struct LoginResponse: Codable {
 
 func LoginProcess(email: String, password: String, userData: UserData) async -> String {
     @AppStorage("openerURL") var openerURL = ""
+    @AppStorage("isAdmin") var isAdmin: Bool = false
+    
+    @AppStorage("isTest") var isTest: Bool = false
+    @AppStorage("noNotification") var noNotification: Bool = false
+    
+    
     var resultofLogin = "Not Logged in yet"
 
     // 로그인 요청을 보냅니다.
@@ -48,8 +54,18 @@ func LoginProcess(email: String, password: String, userData: UserData) async -> 
             UserDefaults.standard.set(loginResponse.email, forKey: "user_email")
             userData.username = loginResponse.username
             userData.email = loginResponse.email
-            print("userID 저장 완료")
-            print("\(userData.username), \(userData.email)")
+            
+            if loginResponse.isAdmin != nil {
+                isAdmin = true
+            } else {
+                isAdmin = false
+                isTest = false
+                noNotification = false
+            }
+            
+
+            print("userData 저장 완료")
+            print("\(userData.username), \(userData.email), \(isAdmin)")
             print("로그인성공!!!!!!!!!!")
             UserDefaults.standard.set(true, forKey: "loginSuccessful")
             if UserDefaults.standard.bool(forKey: "loginSuccessful") {

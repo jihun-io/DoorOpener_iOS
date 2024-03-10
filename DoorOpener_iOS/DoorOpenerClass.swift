@@ -36,16 +36,22 @@ class Global: ObservableObject {
     @Published var doorStatus: String = ""
     
     @AppStorage("isTest") var isTest: Bool = false
+    @AppStorage("noNotification") var noNotification: Bool = false
+
     @AppStorage("isAdmin") var isAdmin: Bool = false
     @AppStorage("openerURL") var openerURL: String = ""
     
     func openDoor() {
         var openerLink: String
-        if isTest {
+        if isTest && noNotification {
+            openerLink = "\(openerURL)/openwithappjsonwithoutnotification"
+        } else if isTest && !noNotification {
             openerLink = "\(openerURL)/openwithapptestjson"
         } else {
             openerLink = "\(openerURL)/openwithappjson"
         }
+        
+        print(openerLink)
 
         self.doorStatus = "Pending"
         DispatchQueue.main.async {

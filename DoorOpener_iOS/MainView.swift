@@ -13,6 +13,7 @@ struct Main: View {
     @EnvironmentObject var userData: UserData
     
     @AppStorage("isTest") var isTest: Bool = false
+    @AppStorage("noNotification") var noNotification: Bool = false
     
     @State private var showingOpen = false
     @State private var animStart = false
@@ -112,10 +113,18 @@ struct Main: View {
                             .cornerRadius(10)
                             .padding(.all)
                         }
-                        if isTest {
+                        if isTest && noNotification {
+                            Text("조용히 문 열기가 설정되었습니다.\n잠금을 해제하면 문이 열리나, 알림이 전송되지 않습니다.")
+                                .font(.caption)
+                                .foregroundColor(Color.gray)
+                                .multilineTextAlignment(.center)
+                        } else if isTest {
                             Text("테스트 모드입니다!\n잠금을 해제해도 문이 열리지 않습니다.")
                                 .font(.caption)
                                 .foregroundColor(Color.gray)
+                                .multilineTextAlignment(.center)
+                        } else {
+                            
                         }
                     }
                     .padding(.all, 15)
@@ -145,5 +154,23 @@ struct Main: View {
                 }
             }
         })
+    }
+}
+
+struct MainViewPreview: PreviewProvider {
+    static var previews: some View {
+        @State var loginSuccessful = false
+        //        Login(loginSuccessful: $loginSuccessful)
+//        ParentView()
+        //        Test()
+//        Settings(loginSuccessful: $loginSuccessful)
+//        OpenLogsView()
+        Main()
+            .environmentObject(UserData())
+            .environmentObject(ViewModel())
+            .environmentObject(Global())
+            .environmentObject(Taptic())
+            .environmentObject(Setup())
+            .environmentObject(SyncWithAppleWatch())
     }
 }
