@@ -34,6 +34,7 @@ struct DoorOpenedView: View {
     @EnvironmentObject var userData: UserData
     
     @AppStorage("isTest") var isTest: Bool = false
+    @AppStorage("noNotification") var noNotification: Bool = false
     
     @EnvironmentObject var taptic: Taptic
     
@@ -59,7 +60,12 @@ struct DoorOpenedView: View {
                         
                         Text("문을 성공적으로 열었습니다.")
                             .padding(.all)
-                        if isTest {
+                        if isTest && noNotification {
+                            Text("조용히 문 열기가 설정되었습니다.\n알림이 전송되지 않았습니다.")
+                                .font(.caption)
+                                .foregroundColor(Color.gray)
+                                .multilineTextAlignment(.center)
+                        } else if isTest {
                             Text("테스트 모드입니다.\n실제로 문이 열리지 않았습니다.")
                                 .font(.caption)
                                 .foregroundColor(Color.gray)
