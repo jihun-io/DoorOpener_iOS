@@ -44,11 +44,11 @@ class Global: ObservableObject {
     func openDoor() {
         var openerLink: String
         if isTest && noNotification {
-            openerLink = "\(openerURL)/openwithappjsonwithoutnotification"
+            openerLink = "\(openerURL)/openwithapp?isNoPush=1"
         } else if isTest && !noNotification {
-            openerLink = "\(openerURL)/openwithapptestjson"
+            openerLink = "\(openerURL)/openwithapp?isTest=1"
         } else {
-            openerLink = "\(openerURL)/openwithappjson"
+            openerLink = "\(openerURL)/openwithapp"
         }
         
         print(openerLink)
