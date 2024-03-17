@@ -169,11 +169,13 @@ struct Login: View {
                     Group {
                         TextField("이메일", text: $email)
                             .padding()
+                            .textContentType(.emailAddress)
                             .keyboardType(/*@START_MENU_TOKEN@*/.emailAddress/*@END_MENU_TOKEN@*/)
                             .background(RoundedRectangle(cornerRadius: 10).fill(Color(UIColor.secondarySystemBackground)))
                         
                         SecureField("비밀번호", text: $password)
                             .padding()
+                            .textContentType(.password)
                             .background(RoundedRectangle(cornerRadius: 10).fill(Color(UIColor.secondarySystemBackground)))
                             .submitLabel(.join)
                             .onSubmit {
