@@ -134,7 +134,6 @@ func logout() {
     @AppStorage("user_name") var userName: String = ""
     @AppStorage("logged_in") var loggedIn: Bool = false
     
-    // 로그아웃 요청을 보냅니다.
     let url = URL(string: "https://dooropener.jihun.io/logout")!
     var request = URLRequest(url: url)
     request.httpMethod = "GET"
@@ -144,7 +143,7 @@ func logout() {
             print("Error: \(error)")
             DispatchQueue.main.async {
                 loggedIn = false
-                UserDefaults.standard.set(false, forKey: "loginSuccessful")  // 로그인 상태를 저장합니다.
+                UserDefaults.standard.set(false, forKey: "loginSuccessful")
                 userEmail = ""
                 userName = ""
                 print("로그아웃 완료!!!")
@@ -152,7 +151,7 @@ func logout() {
         } else {
             DispatchQueue.main.async {
                 loggedIn = false
-                UserDefaults.standard.set(false, forKey: "loginSuccessful")  // 로그인 상태를 저장합니다.
+                UserDefaults.standard.set(false, forKey: "loginSuccessful") 
                 userEmail = ""
                 userName = ""
                 print("로그아웃 완료!!!")
