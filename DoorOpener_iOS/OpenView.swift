@@ -10,7 +10,7 @@ import Foundation
 struct LargeProgressViewStyle: ProgressViewStyle {
     func makeBody(configuration: Configuration) -> some View {
         ProgressView(configuration)
-            .scaleEffect(2) // 크기를 2배로 조절합니다.
+            .scaleEffect(2) 
     }
 }
 
