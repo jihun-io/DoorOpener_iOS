@@ -308,8 +308,8 @@ struct EditUser: View {
                 DispatchQueue.main.async {
                     UserDefaults.standard.set(name, forKey: "user_name")
                     UserDefaults.standard.set(email, forKey: "user_email")
-                    userData.username = name // @State 프로퍼티를 업데이트합니다.
-                    userData.email = email // @State 프로퍼티를 업데이트합니다.
+                    userData.username = name
+                    userData.email = email 
                     print("사용자 정보 업데이트 완료: \(userData.username), \(userData.email)")
                     
                     self.presentationMode.wrappedValue.dismiss()
