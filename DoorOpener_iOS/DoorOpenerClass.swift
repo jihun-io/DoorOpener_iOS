@@ -123,16 +123,13 @@ class UserData: ObservableObject {
 func sendDeviceTokenToServer(email: String, token: String) {
     @AppStorage("openerURL") var openerURL: String = ""
 
-    // Create the URL and request
     let url = URL(string: "\(openerURL)/apnstokenget")!
     var request = URLRequest(url: url)
     request.httpMethod = "POST"
     
-    // Set the request body
     let body = "email=\(email)&token=\(token)"
     request.httpBody = body.data(using: .utf8)
     
-    // Create the task
     let task = URLSession.shared.dataTask(with: request) { (data, response, error) in
         if let error = error {
             print("Error: \(error)")
@@ -142,23 +139,19 @@ func sendDeviceTokenToServer(email: String, token: String) {
         }
     }
     
-    // Start the task
     task.resume()
 }
 
 func removeDeviceTokenToServer(token: String) {
     @AppStorage("openerURL") var openerURL: String = ""
 
-    // Create the URL and request
     let url = URL(string: "\(openerURL)/apnstokenremove")!
     var request = URLRequest(url: url)
     request.httpMethod = "POST"
     
-    // Set the request body
     let body = "token=\(token)"
     request.httpBody = body.data(using: .utf8)
     
-    // Create the task
     let task = URLSession.shared.dataTask(with: request) { (data, response, error) in
         if let error = error {
             print("Error: \(error)")
@@ -168,7 +161,6 @@ func removeDeviceTokenToServer(token: String) {
         }
     }
     
-    // Start the task
     task.resume()
 }
 
@@ -180,7 +172,7 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
     }
 
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
-        print("토큰 가져오자")
+        print("토큰 가져오는 중...")
         let tokenParts = deviceToken.map { data in String(format: "%02.2hhx", data) }
         let token = tokenParts.joined()
         // Check if the user is logged in
