@@ -29,7 +29,6 @@ func LoginProcess(email: String, password: String, userData: UserData) async -> 
     
     var resultofLogin = "Not Logged in yet"
 
-    // 로그인 요청을 보냅니다.
     let loginData = LoginData(email: email, password: password)
     guard let jsonData = try? JSONEncoder().encode(loginData) else { return resultofLogin }
     
@@ -46,10 +45,8 @@ func LoginProcess(email: String, password: String, userData: UserData) async -> 
     do {
         let (data, response) = try await session.data(for: request)
 
-        // 서버의 응답에서 로그인 성공 메시지를 찾습니다.
         let loginResponse = try JSONDecoder().decode(LoginResponse.self, from: data)
         if loginResponse.result == "Success" {
-            // 사용자 이름과 이메일을 저장합니다.
             UserDefaults.standard.set(loginResponse.username, forKey: "user_name")
             UserDefaults.standard.set(loginResponse.email, forKey: "user_email")
             userData.username = loginResponse.username
@@ -66,7 +63,7 @@ func LoginProcess(email: String, password: String, userData: UserData) async -> 
 
             print("userData 저장 완료")
             print("\(userData.username), \(userData.email), \(isAdmin)")
-            print("로그인성공!!!!!!!!!!")
+            print("로그인 성공!")
             UserDefaults.standard.set(true, forKey: "loginSuccessful")
             if UserDefaults.standard.bool(forKey: "loginSuccessful") {
                 print("로그인값이 트루다!")
